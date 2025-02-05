@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Plane, Map, PlaneLanding } from "lucide-react";
 
 interface SearchResultsProps {
   query: string;
@@ -11,16 +14,34 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ query, className }: SearchResultsProps) {
+  const [sortBy, setSortBy] = useState<"price" | "rating" | "duration">("price");
   const { data: results, isLoading, error } = useQuery<Destination[]>({
     queryKey: ["/api/destinations", query],
     enabled: query.length > 0,
   });
 
+  const sortedResults = results?.slice().sort((a, b) => {
+    switch (sortBy) {
+      case "price":
+        return a.price - b.price;
+      case "rating":
+        return b.rating - a.rating;
+      case "duration":
+        return a.tags.length - b.tags.length; // Using tags length as proxy for duration
+      default:
+        return 0;
+    }
+  });
+
   if (error) {
     return (
-      <div className={cn("text-center p-8", className)}>
-        <p className="text-destructive">
-          Error loading search results. Please try again.
+      <div className={cn("text-center p-8 rounded-lg border border-destructive/50 bg-destructive/10", className)}>
+        <PlaneLanding className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <p className="text-destructive font-semibold">
+          Error loading search results
+        </p>
+        <p className="text-sm text-destructive/80 mt-2">
+          Please try again or adjust your search criteria
         </p>
       </div>
     );
@@ -58,14 +79,15 @@ export function SearchResults({ query, className }: SearchResultsProps) {
     );
   }
 
-  if (!results?.length) {
+  if (!sortedResults?.length) {
     return (
-      <div className={cn("text-center p-8", className)}>
-        <p className="text-muted-foreground text-lg">
-          No destinations found matching your search.
+      <div className={cn("text-center p-12 rounded-lg border-2 border-dashed", className)}>
+        <Map className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-lg font-semibold">
+          No destinations found
         </p>
         <p className="text-sm text-muted-foreground mt-2">
-          Try adjusting your search terms or explore our popular destinations below.
+          Try adjusting your search terms or explore our popular destinations below
         </p>
       </div>
     );
@@ -74,10 +96,15 @@ export function SearchResults({ query, className }: SearchResultsProps) {
   return (
     <div className={cn("space-y-6", className)}>
       <div className="flex justify-between items-center">
-        <p className="text-lg font-medium">
-          Found {results.length} route{results.length === 1 ? "" : "s"}
-        </p>
-        <Select defaultValue="price">
+        <div className="space-y-1">
+          <h3 className="text-lg font-medium">
+            Found {sortedResults.length} route{sortedResults.length === 1 ? "" : "s"}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Showing all available travel options
+          </p>
+        </div>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
@@ -88,8 +115,16 @@ export function SearchResults({ query, className }: SearchResultsProps) {
           </SelectContent>
         </Select>
       </div>
+
+      <div className="flex gap-2 flex-wrap">
+        <Badge variant="secondary" className="gap-1">
+          <Plane className="w-3 h-3" /> Flight included
+        </Badge>
+        {/* Add more filter badges as needed */}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {results.map((destination) => (
+        {sortedResults.map((destination) => (
           <div 
             key={destination.id}
             className="transform hover:-translate-y-1 transition-transform duration-200"

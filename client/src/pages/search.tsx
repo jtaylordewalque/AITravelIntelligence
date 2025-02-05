@@ -16,7 +16,11 @@ const getDestinationImage = (destination: string): string => {
     'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80",
     'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80",
   };
-  return images[cleanDestination] || images.default;
+
+  console.log('Destination:', cleanDestination);
+  const selectedImage = images[cleanDestination] || images.default;
+  console.log('Selected Image:', selectedImage);
+  return selectedImage;
 };
 
 export default function Search() {
@@ -40,7 +44,7 @@ export default function Search() {
       <div 
         className="relative py-12"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("${backgroundImage}")`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${backgroundImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -62,10 +66,10 @@ export default function Search() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 mb-8 border">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl font-bold mb-2">
             Routes from {from} to {to}
           </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground">
             {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}
             {returnDate && ` → ${format(returnDate, "EEEE, MMMM d, yyyy")}`} · 
             {passengers} passenger{passengers !== 1 ? "s" : ""} · 
@@ -73,7 +77,7 @@ export default function Search() {
           </p>
         </div>
 
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto">
           <SearchResults 
             query={`${from} ${to}`} 
             className={isLoading ? "opacity-50" : ""}

@@ -92,8 +92,8 @@ export function SearchResults({ query, className, from, to }: SearchResultsProps
                 </div>
 
                 <div className="flex-1 min-w-[200px]">
-                  <p className="text-sm text-muted-foreground">{route.description}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <p className="text-sm text-muted-foreground mb-2">{route.description}</p>
+                  <div className="flex flex-wrap gap-2">
                     {route.tags
                       .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
                       .map(tag => (

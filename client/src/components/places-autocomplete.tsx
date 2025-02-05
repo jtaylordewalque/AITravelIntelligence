@@ -17,55 +17,31 @@ interface PlacesAutocompleteProps {
   className?: string;
 }
 
-let scriptPromise: Promise<void> | null = null;
+// Single instance of script loading promise
+const scriptLoaded = new Promise<void>((resolve, reject) => {
+  if (window.google?.maps?.places) {
+    resolve();
+    return;
+  }
 
-const loadPlacesScript = () => {
-  if (scriptPromise) return scriptPromise;
+  window.initGooglePlaces = () => resolve();
 
-  scriptPromise = new Promise((resolve, reject) => {
-    if (window.google?.maps?.places) {
-      resolve();
-      return;
-    }
-
-    const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
-    if (!apiKey) {
-      reject(new Error('Google Places API key is missing'));
-      return;
-    }
-
-    window.initGooglePlaces = () => resolve();
-
-    const script = document.createElement('script');
-    script.id = 'google-places-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGooglePlaces`;
-    script.async = true;
-    script.onerror = () => reject(new Error('Failed to load Google Places API'));
-    document.head.appendChild(script);
-  });
-
-  return scriptPromise;
-};
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places&callback=initGooglePlaces`;
+  script.async = true;
+  document.head.appendChild(script);
+  script.onerror = () => reject(new Error('Failed to load Google Places API'));
+});
 
 export function PlacesAutocomplete({ value, onChange, placeholder, className }: PlacesAutocompleteProps) {
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPlacesScript()
-      .then(() => setIsReady(true))
-      .catch(error => {
-        console.error('Error loading Places API:', error);
-        setError(error.message);
-      });
-  }, []);
+    if (!inputRef.current) return;
 
-  useEffect(() => {
-    if (!isReady || !inputRef.current) return;
-
-    try {
+    scriptLoaded.then(() => {
       if (autocompleteRef.current) {
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
@@ -83,17 +59,17 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
           onChange(place.name);
         }
       });
+    }).catch(err => {
+      console.error('Places API Error:', err);
+      setError('Error initializing location search');
+    });
 
-      return () => {
-        if (autocompleteRef.current) {
-          window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        }
-      };
-    } catch (error) {
-      console.error('Error initializing Places Autocomplete:', error);
-      setError('Error initializing Places Autocomplete');
-    }
-  }, [isReady, onChange]);
+    return () => {
+      if (autocompleteRef.current) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, [onChange]);
 
   return (
     <div className={cn("relative", className)}>

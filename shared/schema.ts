@@ -10,8 +10,6 @@ export const destinations = pgTable("destinations", {
   price: integer("price").notNull(),
   rating: integer("rating").notNull(),
   tags: text("tags").array().notNull(),
-  from: text("from").notNull(),
-  to: text("to").notNull(),
 });
 
 export const transportModes = pgTable("transport_modes", {
@@ -58,6 +56,17 @@ export const searchResultSchema = z.object({
   combinedRoutes: z.array(createInsertSchema(combinedRoutes)),
 });
 
+// Travel Suggestion Types
+export const travelSuggestionSchema = z.object({
+  destination: z.string(),
+  duration: z.string(),
+  budget: z.string(),
+  activities: z.array(z.string()),
+  transportation: z.array(z.string()),
+  accommodation: z.string(),
+});
+
+export type TravelSuggestion = z.infer<typeof travelSuggestionSchema>;
 export type Destination = typeof destinations.$inferSelect;
 export type TransportMode = typeof transportModes.$inferSelect;
 export type Activity = typeof activities.$inferSelect;

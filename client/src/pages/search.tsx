@@ -10,7 +10,6 @@ export default function Search() {
 
   const { data: results, isLoading } = useQuery<Destination[]>({
     queryKey: ["/api/destinations", query],
-    queryFn: getQueryFn({ on401: "throw" }),
   });
 
   return (

@@ -40,8 +40,8 @@ const formatDate = (dateString: string) => {
 
 export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", query],
-    enabled: query.length > 0,
+    queryKey: ["/api/destinations", searchParams],
+    enabled: !!searchParams,
   });
 
   if (isLoading) {
@@ -157,9 +157,9 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                 <div className="flex items-center gap-6 ml-auto">
                   <div className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">London</span>
+                      <span className="font-medium">{searchParams?.from || route.from}</span>
                       <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">Paris</span>
+                      <span className="font-medium">{searchParams?.to || route.to}</span>
                     </div>
                   </div>
                   <div className="text-right">

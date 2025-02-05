@@ -10,12 +10,13 @@ export default function Search() {
   const params = new URLSearchParams(location.split("?")[1]);
   const from = params.get("from") || "";
   const to = params.get("to") || "";
-  const date = params.get("date") ? new Date(params.get("date")!) : null;
+  const departureDate = params.get("departureDate") ? new Date(params.get("departureDate")!) : null;
+  const returnDate = params.get("returnDate") ? new Date(params.get("returnDate")!) : null;
   const passengers = parseInt(params.get("passengers") || "1");
   const travelClass = params.get("class") || "economy";
 
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to, date, passengers, travelClass }],
+    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
   });
 
   return (
@@ -30,7 +31,10 @@ export default function Search() {
             Routes from {from} to {to}
           </h2>
           <p className="text-muted-foreground">
-            {date ? format(date, "EEEE, MMMM d, yyyy") : "Any date"} · {passengers} passenger{passengers !== 1 ? "s" : ""} · {travelClass.charAt(0).toUpperCase() + travelClass.slice(1)} class
+            {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}
+            {returnDate && ` → ${format(returnDate, "EEEE, MMMM d, yyyy")}`} · 
+            {passengers} passenger{passengers !== 1 ? "s" : ""} · 
+            {travelClass.charAt(0).toUpperCase() + travelClass.slice(1)} class
           </p>
         </div>
 

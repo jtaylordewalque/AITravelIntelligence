@@ -16,11 +16,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const searchSchema = z.object({
   origin: z.string().min(2, "Please enter at least 2 characters"),
   destination: z.string().min(2, "Please enter at least 2 characters"),
-  date: z.date({
-    required_error: "Please select a date",
+  departureDate: z.date({
+    required_error: "Please select a departure date",
   }),
+  returnDate: z.date().optional(),
   passengers: z.number().min(1).max(9),
   class: z.enum(["economy", "business", "first"]),
+}).refine((data) => {
+  if (data.returnDate) {
+    return data.returnDate > data.departureDate;
+  }
+  return true;
+}, {
+  message: "Return date must be after departure date",
+  path: ["returnDate"],
 });
 
 type SearchFormData = z.infer<typeof searchSchema>;
@@ -42,7 +51,8 @@ export function SearchForm() {
     const searchParams = new URLSearchParams({
       from: data.origin,
       to: data.destination,
-      date: data.date.toISOString(),
+      departureDate: data.departureDate.toISOString(),
+      ...(data.returnDate && { returnDate: data.returnDate.toISOString() }),
       passengers: data.passengers.toString(),
       class: data.class,
     });
@@ -87,10 +97,10 @@ export function SearchForm() {
             <div className="flex gap-4">
               <FormField
                 control={form.control}
-                name="date"
+                name="departureDate"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Departure Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -104,7 +114,7 @@ export function SearchForm() {
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Select departure date</span>
                             )}
                           </Button>
                         </FormControl>
@@ -125,6 +135,49 @@ export function SearchForm() {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="returnDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Return Date (Optional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Select return date</span>
+                            )}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ?? undefined}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date <= (form.watch("departureDate") || new Date()) ||
+                            date > new Date(2025, 11, 31)
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex gap-4">
               <FormField
                 control={form.control}
                 name="passengers"

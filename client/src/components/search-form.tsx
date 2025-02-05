@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 const searchSchema = z.object({
   origin: z.string().min(2, "Please enter at least 2 characters"),
@@ -36,6 +37,8 @@ type SearchFormData = z.infer<typeof searchSchema>;
 
 export function SearchForm() {
   const [, setLocation] = useLocation();
+  const [departureDateOpen, setDepartureDateOpen] = useState(false);
+  const [returnDateOpen, setReturnDateOpen] = useState(false);
 
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
@@ -101,7 +104,7 @@ export function SearchForm() {
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>Departure Date</FormLabel>
-                    <Popover>
+                    <Popover open={departureDateOpen} onOpenChange={setDepartureDateOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -123,7 +126,10 @@ export function SearchForm() {
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setDepartureDateOpen(false);
+                          }}
                           disabled={(date) =>
                             date < new Date() || date > new Date(2025, 11, 31)
                           }
@@ -141,7 +147,7 @@ export function SearchForm() {
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>Return Date (Optional)</FormLabel>
-                    <Popover>
+                    <Popover open={returnDateOpen} onOpenChange={setReturnDateOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -163,7 +169,10 @@ export function SearchForm() {
                         <Calendar
                           mode="single"
                           selected={field.value ?? undefined}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setReturnDateOpen(false);
+                          }}
                           disabled={(date) =>
                             date <= (form.watch("departureDate") || new Date()) ||
                             date > new Date(2025, 11, 31)

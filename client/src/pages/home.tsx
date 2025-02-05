@@ -40,13 +40,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          <div>
+      <div className="container mx-auto px-4 -mt-16 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6">
             <h2 className="text-3xl font-bold mb-6">Find Your Route</h2>
             <SearchForm />
           </div>
-          <div>
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6">
             <h2 className="text-3xl font-bold mb-6">Not sure where to go?</h2>
             <p className="text-lg text-muted-foreground mb-6">
               Tell our AI Travel Agent about your ideal trip and get personalized suggestions

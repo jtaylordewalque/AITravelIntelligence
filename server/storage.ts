@@ -13,73 +13,89 @@ export class MemStorage implements IStorage {
   private destinations: Destination[] = [
     {
       id: 1,
-      name: "Paris to London",
-      description: "Experience the charm of Paris and London with this route",
+      name: "Train route",
+      description: "Fast and comfortable train journey",
       imageUrl: "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b",
-      price: 200,
+      price: 80,
       rating: 5,
-      tags: ["train", "scenic", "historic"],
+      tags: ["train", "2h 24min"],
     },
     {
       id: 2,
-      name: "London to Amsterdam",
-      description: "Connect two iconic European capitals by train or plane",
+      name: "Bus route",
+      description: "Budget-friendly bus travel",
       imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
-      price: 250,
+      price: 26,
       rating: 4,
-      tags: ["train", "plane", "city"],
+      tags: ["bus", "7h 55min"],
     },
+    {
+      id: 3,
+      name: "Rideshare option",
+      description: "Flexible rideshare journey",
+      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      price: 25,
+      rating: 3,
+      tags: ["rideshare", "5h 49min"],
+    },
+    {
+      id: 4,
+      name: "Flight route",
+      description: "Quick air travel",
+      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      price: 69,
+      rating: 4,
+      tags: ["plane", "4h 15min"],
+    },
+    {
+      id: 5,
+      name: "Drive via Eurotunnel",
+      description: "Self-drive option via Eurotunnel",
+      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      price: 91,
+      rating: 4,
+      tags: ["car", "eurotunnel", "4h 41min"],
+    },
+    {
+      id: 6,
+      name: "Drive with ferry",
+      description: "Self-drive option with ferry crossing",
+      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      price: 91,
+      rating: 3,
+      tags: ["car", "ferry", "5h 52min"],
+    }
   ];
 
   private transportModes: TransportMode[] = [
     {
       id: 1,
-      name: "First Class Flight",
-      type: "air",
-      imageUrl: "https://images.unsplash.com/photo-1653278260919-2b938bce95ed",
-      price: 1000,
-    },
-    {
-      id: 2,
-      name: "Luxury Train",
+      name: "Train",
       type: "rail",
       imageUrl: "https://images.unsplash.com/photo-1553027578-a8a2b2b13329",
-      price: 500,
-    },
-  ];
-
-  private routeSegments: RouteSegment[] = [
-    {
-      id: 1,
-      startLocation: "London",
-      endLocation: "Paris",
-      transportModeId: 2, // train
-      duration: 144, // 2h 24min
       price: 80,
-      departureTime: "09:00",
-      arrivalTime: "11:24",
     },
     {
       id: 2,
-      startLocation: "Paris",
-      endLocation: "Amsterdam",
-      transportModeId: 1, // flight
-      duration: 80, // 1h 20min
-      price: 120,
-      departureTime: "13:00",
-      arrivalTime: "14:20",
+      name: "Bus",
+      type: "bus",
+      imageUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957",
+      price: 26,
     },
-  ];
-
-  private combinedRoutes: CombinedRoute[] = [
     {
-      id: 1,
-      name: "London to Amsterdam via Paris",
-      totalPrice: 200,
-      totalDuration: 264, // 4h 24min total
-      segments: [1, 2], // references to routeSegments
-      rating: 4,
+      id: 3,
+      name: "Flight",
+      type: "air",
+      imageUrl: "https://images.unsplash.com/photo-1653278260919-2b938bce95ed",
+      price: 69,
     },
+    {
+      id: 4,
+      name: "Rideshare",
+      type: "car",
+      imageUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
+      price: 25,
+    }
   ];
 
   async searchDestinations({ from, to }: { from?: string; to?: string }): Promise<Destination[]> {
@@ -107,25 +123,11 @@ export class MemStorage implements IStorage {
   }
 
   async getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]> {
-    return this.routeSegments.filter(
-      segment => 
-        segment.startLocation.toLowerCase() === startLocation.toLowerCase() &&
-        segment.endLocation.toLowerCase() === endLocation.toLowerCase()
-    );
+    return this.routeSegments;
   }
 
   async getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]> {
-    // For now, return all combined routes that include segments matching the from/to locations
-    return this.combinedRoutes.filter(route => {
-      const segments = route.segments.map(id => 
-        this.routeSegments.find(segment => segment.id === id)
-      );
-      const firstSegment = segments[0];
-      const lastSegment = segments[segments.length - 1];
-
-      return firstSegment?.startLocation.toLowerCase() === from.toLowerCase() &&
-             lastSegment?.endLocation.toLowerCase() === to.toLowerCase();
-    });
+    return this.combinedRoutes;
   }
 
   private activities: Activity[] = [
@@ -146,6 +148,9 @@ export class MemStorage implements IStorage {
       duration: 3,
     },
   ];
+
+  private routeSegments: RouteSegment[] = [];
+  private combinedRoutes: CombinedRoute[] = [];
 }
 
 export const storage = new MemStorage();

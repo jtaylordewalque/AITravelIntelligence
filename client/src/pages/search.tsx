@@ -5,26 +5,6 @@ import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
 import { format } from "date-fns";
 
-type DestinationImages = {
-  [key: string]: string;
-};
-
-const getDestinationImage = (destination: string): string => {
-  const cleanDestination = destination.trim().toLowerCase();
-  const images: DestinationImages = {
-    'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2000&q=80",
-    'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80",
-    'rome': "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=2000&q=80",
-    'berlin': "https://images.unsplash.com/photo-1560969184-10fe8719e047?auto=format&fit=crop&w=2000&q=80",
-    'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80"
-  };
-
-  console.log('Destination:', cleanDestination);
-  const selectedImage = images[cleanDestination] || images.default;
-  console.log('Selected Image:', selectedImage);
-  return selectedImage;
-};
-
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
@@ -39,16 +19,17 @@ export default function Search() {
     queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
   });
 
-  const backgroundImage = getDestinationImage(to);
-
   return (
     <div className="min-h-screen bg-background">
       <div 
-        className="relative py-12"
+        className="relative py-12 bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("${backgroundImage}")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundColor: 'rgb(0, 0, 0)',
+          backgroundImage: to.toLowerCase() === 'paris' 
+            ? 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2000&q=80")'
+            : to.toLowerCase() === 'london'
+            ? 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80")'
+            : 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80")'
         }}
       >
         <div className="container mx-auto px-4">

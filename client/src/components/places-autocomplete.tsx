@@ -24,29 +24,33 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
   const autocompleteRef = useRef<any>(null);
 
   useEffect(() => {
+    if (window.google?.maps?.places) {
+      setScriptLoaded(true);
+      return;
+    }
+
     const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
     if (!apiKey) {
-      setError('Google Places API key is not configured');
+      setError('Google Places API key is missing');
       return;
     }
 
     // Load the Google Maps JavaScript API
-    if (!window.google && !document.querySelector('#google-places-script')) {
+    if (!document.querySelector('#google-places-script')) {
       window.initGooglePlaces = () => {
-        try {
-          setScriptLoaded(true);
-          setError(null);
-        } catch (error) {
-          console.error('Error initializing Google Places:', error);
-          setError('Failed to initialize Google Places');
-        }
+        setScriptLoaded(true);
+        setError(null);
       };
 
       const script = document.createElement('script');
       script.id = 'google-places-script';
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGooglePlaces`;
       script.async = true;
-      script.onerror = () => setError('Failed to load Google Places API');
+      script.defer = true;
+      script.onerror = () => {
+        setError('Failed to load Google Places API');
+        console.error('Failed to load Google Places API');
+      };
       document.head.appendChild(script);
 
       return () => {
@@ -54,32 +58,30 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
         const script = document.querySelector('#google-places-script');
         if (script) script.remove();
       };
-    } else if (window.google?.maps?.places) {
-      setScriptLoaded(true);
     }
   }, []);
 
   // Initialize autocomplete when the script is loaded
   useEffect(() => {
-    if (scriptLoaded && inputRef.current && !autocompleteRef.current) {
-      try {
-        autocompleteRef.current = new window.google.maps.places.Autocomplete(
-          inputRef.current,
-          { types: ['(cities)'] }
-        );
+    if (!scriptLoaded || !inputRef.current || autocompleteRef.current) return;
 
-        autocompleteRef.current.addListener('place_changed', () => {
-          const place = autocompleteRef.current?.getPlace();
-          if (place?.formatted_address) {
-            onChange(place.formatted_address);
-          } else if (place?.name) {
-            onChange(place.name);
-          }
-        });
-      } catch (e) {
-        console.error('Error initializing Places Autocomplete:', e);
-        setError('Error initializing Places Autocomplete');
-      }
+    try {
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
+        inputRef.current,
+        { types: ['(cities)'] }
+      );
+
+      autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current.getPlace();
+        if (place?.formatted_address) {
+          onChange(place.formatted_address);
+        } else if (place?.name) {
+          onChange(place.name);
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing Places Autocomplete:', error);
+      setError('Error initializing Places Autocomplete');
     }
   }, [scriptLoaded, onChange]);
 

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Users } from "lucide-react";
+import { ArrowRight, Users, Plus, Minus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -185,15 +185,37 @@ export function SearchForm() {
                   <FormItem className="flex-1">
                     <FormLabel>Passengers</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          min={1}
-                          max={9}
-                          {...field}
-                          onChange={e => field.onChange(parseInt(e.target.value))}
-                        />
-                        <Users className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <div className="relative flex items-center">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="rounded-r-none"
+                          onClick={() => {
+                            const newValue = Math.max(1, field.value - 1);
+                            field.onChange(newValue);
+                          }}
+                          disabled={field.value <= 1}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <div className="flex-1 px-3 py-2 text-center border-y border-input">
+                          <span className="text-sm font-medium">{field.value}</span>
+                          <Users className="inline-block ml-2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="rounded-l-none"
+                          onClick={() => {
+                            const newValue = Math.min(9, field.value + 1);
+                            field.onChange(newValue);
+                          }}
+                          disabled={field.value >= 9}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
                       </div>
                     </FormControl>
                   </FormItem>

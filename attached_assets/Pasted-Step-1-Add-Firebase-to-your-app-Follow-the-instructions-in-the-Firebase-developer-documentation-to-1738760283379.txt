@@ -1,0 +1,83 @@
+Step 1: Add Firebase to your app
+
+Follow the instructions in the Firebase developer documentation to add Firebase to your app.
+Step 2: Add the App Check library and initialize App Check
+
+Firebase provides instructions for each default attestation provider. These instructions show you how to set up a Firebase project and add the App Check library to your app. Follow the code samples provided to initialize App Check.
+
+    Instructions for reCAPTCHA Enterprise.
+
+    Instructions for reCAPTCHA v3.
+    You must register your site for reCAPTCHA v3 and get your reCAPTCHA v3 site key and secret key using the reCAPTCHA site registration tool before you enable the API on the Cloud Console. See the reCAPTCHA v3 documentation for more information and instructions.
+
+Step 3: Load Maps JS API libraries
+
+Load the core, Maps, and Places libraries as shown in the following snippet. For more information and instructions, see the Maps JavaScript API Place Class documentation.
+
+    async function init() {
+      const {Settings} = await google.maps.importLibrary('core');
+      const {Map} = await google.maps.importLibrary('maps');
+      const {Place} = await google.maps.importLibrary('places');
+    }  
+
+Step 4: Initialize the Places and App Check APIs
+Initialize App Check using the config provided by the Firebase console.
+
+    reCAPTCHA v3 instructions.
+    reCAPTCHA Enterprise instructions.
+
+Ensure that requests to the Maps JS API are accompanied by App Check tokens:
+
+      async function init() {
+        const {Settings} = await google.maps.importLibrary('core');
+        const {Map} = await google.maps.importLibrary('maps');
+        const {Place} = await google.maps.importLibrary('places');
+      
+        const app = initializeApp({
+          // Your firebase configuration object
+        });
+      
+        // Pass your reCAPTCHA Enterprise site key to initializeAppCheck().
+        const appCheck = initializeAppCheck(app, {
+          provider: new ReCaptchaEnterpriseProvider(
+            'abcdefghijklmnopqrstuvwxy-1234567890abcd',
+          ),
+      
+          // Optional argument. If true, the SDK automatically refreshes App Check
+          // tokens as needed.
+          isTokenAutoRefreshEnabled: true,
+        });
+      
+        Settings.getInstance().fetchAppCheckToken = () =>
+            getToken(appCheck, /* forceRefresh = */ false);
+      
+        // Make a Places JS request
+        const place = new Place({id: 'ChIJN5Nz71W3j4ARhx5bwpTQEGg'});
+        await place.fetchFields({fields: ['*']});
+      
+        // Load a map
+        map = new Map(document.getElementById("map"), {
+          center: { lat: 37.4161493, lng: -122.0812166 },
+          zoom: 8,
+        });
+      }  
+      
+
+Step 5: Enable debugging (optional)
+
+If you'd like to develop and test your app locally, or run it in a continuous integration (CI) environment, you can create a debug build of your app that uses a debug secret to obtain valid App Check tokens. This lets you avoid using real attestation providers in your debug build.
+
+To test your app locally:
+
+    Activate the debug provider for development purposes.
+    You will receive an automatically generated random UUID4 (called the _debug token_ in the App Check documentation) from the SDK's debug logs. Add this token to the Firebase console.
+    For more information and instructions, see the App Check documentation.
+
+To run your app in a CI environment:
+
+    Generate a random UUID4 from the Firebase console.
+    Add the UUID4 as a debug token, and then copy it into a secret store that the CI tests will access per test run.
+    For more information and instructions, see the App Check documentation.
+
+Step 6: Monitor your app requests and decide on enforcement
+Before you begin enforcement, you'll want to make sure that you won't disrupt legitimate users of your app. To do this, visit the App Check metrics screen to see what percentage of your app's traffic is verified, outdated, or illegitimate. Once you see that the majority of your traffic is verified, you can enable enforcement. 

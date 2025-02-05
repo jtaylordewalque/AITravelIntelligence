@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { cn } from "@/lib/utils";
 import { MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { getToken } from '@firebase/app-check';
+import { appCheck } from '@/lib/firebase';
 
 declare global {
   interface Window {
@@ -32,9 +34,19 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
 
     // Load the Google Maps JavaScript API
     if (!window.google && !document.querySelector('#google-places-script')) {
-      window.initGooglePlaces = () => {
-        setScriptLoaded(true);
-        setError(null);
+      window.initGooglePlaces = async () => {
+        try {
+          // Configure Firebase App Check token for Google Maps
+          const appCheckToken = await getToken(appCheck, false);
+          const maps = await google.maps.importLibrary('maps') as { Map: any };
+          const places = await google.maps.importLibrary('places') as { Autocomplete: any };
+
+          setScriptLoaded(true);
+          setError(null);
+        } catch (error) {
+          console.error('Error initializing Google Places:', error);
+          setError('Failed to initialize Google Places');
+        }
       };
 
       const script = document.createElement('script');
@@ -78,17 +90,6 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
     }
   }, [scriptLoaded, onChange]);
 
-  if (error) {
-    return (
-      <div className={cn("relative", className)}>
-        <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-        <div className="w-full h-10 px-3 py-2 border rounded-md bg-background pl-9 text-red-500">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={cn("relative", className)}>
       <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground z-10" />
@@ -101,6 +102,11 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
         className={cn("pl-9", scriptLoaded ? "" : "bg-muted")}
         disabled={!scriptLoaded}
       />
+      {error && (
+        <div className="absolute w-full mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

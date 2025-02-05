@@ -6,7 +6,7 @@ import { type Destination } from "@shared/schema";
 import { format } from "date-fns";
 
 const getDestinationImage = (destination: string) => {
-  const images = {
+  const images: Record<string, string> = {
     'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34", // Eiffel Tower
     'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad", // London Bridge
     'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800", // Generic travel image
@@ -54,18 +54,6 @@ export default function Search() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 mb-8 border">
-          <h2 className="text-2xl font-bold">
-            Routes from {from} to {to}
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}
-            {returnDate && ` → ${format(returnDate, "EEEE, MMMM d, yyyy")}`} · 
-            {passengers} passenger{passengers !== 1 ? "s" : ""} · 
-            {travelClass.charAt(0).toUpperCase() + travelClass.slice(1)} class
-          </p>
-        </div>
-
         <div className="max-w-4xl">
           <SearchResults 
             query={`${from} ${to}`} 

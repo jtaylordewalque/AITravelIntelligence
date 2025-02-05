@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { SearchForm } from "@/components/search-form";
-import { DestinationCard } from "@/components/destination-card";
+import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
 import { format } from "date-fns";
 
@@ -26,11 +26,11 @@ export default function Search() {
           <SearchForm />
         </div>
 
-        <div className="mb-6 space-y-2">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold">
             Routes from {from} to {to}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}
             {returnDate && ` → ${format(returnDate, "EEEE, MMMM d, yyyy")}`} · 
             {passengers} passenger{passengers !== 1 ? "s" : ""} · 
@@ -38,24 +38,12 @@ export default function Search() {
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-[300px] bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {results?.map(destination => (
-              <DestinationCard key={destination.id} destination={destination} />
-            ))}
-            {(!results || results.length === 0) && (
-              <p className="col-span-full text-center text-muted-foreground">
-                No routes found between {from} and {to}. Try different cities or explore our popular destinations.
-              </p>
-            )}
-          </div>
-        )}
+        <div className="max-w-4xl">
+          <SearchResults 
+            query={`${from} ${to}`} 
+            className={isLoading ? "opacity-50" : ""}
+          />
+        </div>
       </div>
     </div>
   );

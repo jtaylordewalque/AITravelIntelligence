@@ -22,10 +22,8 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
-  const uniqueId = useRef(`places-autocomplete-${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
-    // If script is already loaded, enable the component
     if (window.google?.maps?.places) {
       setScriptLoaded(true);
       return;
@@ -40,7 +38,6 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
     if (!document.querySelector('#google-places-script')) {
       window.initGooglePlaces = () => {
         setScriptLoaded(true);
-        setError(null);
       };
 
       const script = document.createElement('script');
@@ -50,7 +47,6 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
       script.defer = true;
       script.onerror = () => {
         setError('Failed to load Google Places API');
-        console.error('Failed to load Google Places API');
       };
       document.head.appendChild(script);
 
@@ -66,18 +62,16 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
     if (!scriptLoaded || !inputRef.current) return;
 
     try {
-      // Cleanup previous instance if it exists
       if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
 
-      // Create new instance
       autocompleteRef.current = new window.google.maps.places.Autocomplete(
         inputRef.current,
         { types: ['(cities)'] }
       );
 
-      const listener = autocompleteRef.current.addListener('place_changed', () => {
+      autocompleteRef.current.addListener('place_changed', () => {
         const place = autocompleteRef.current.getPlace();
         if (place?.formatted_address) {
           onChange(place.formatted_address);
@@ -88,7 +82,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
 
       return () => {
         if (autocompleteRef.current) {
-          google.maps.event.clearInstanceListeners(autocompleteRef.current);
+          window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
         }
       };
     } catch (error) {
@@ -106,8 +100,8 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-9"
-        aria-label={placeholder}
+        className={cn("pl-9", !scriptLoaded && "opacity-50 cursor-not-allowed")}
+        disabled={!scriptLoaded}
       />
       {error && (
         <div className="absolute w-full mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">

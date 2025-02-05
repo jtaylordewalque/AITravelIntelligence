@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star, MapPin, Calendar, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 interface SearchResultsProps {
   query: string;
@@ -30,6 +30,12 @@ const getTransportIcon = (tags: string[]) => {
 
 const getDuration = (tags: string[]) => {
   return tags.find(tag => tag.includes('min')) || '';
+};
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = parseISO(dateString);
+  return isValid(date) ? format(date, "PP") : '';
 };
 
 export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
@@ -88,8 +94,8 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                 <div>
                   <p className="text-sm text-muted-foreground">Dates</p>
                   <p className="font-medium">
-                    {format(new Date(searchParams.departureDate), "PP")}
-                    {searchParams.returnDate && ` - ${format(new Date(searchParams.returnDate), "PP")}`}
+                    {formatDate(searchParams.departureDate)}
+                    {searchParams.returnDate && formatDate(searchParams.returnDate) && ` - ${formatDate(searchParams.returnDate)}`}
                   </p>
                 </div>
               </div>

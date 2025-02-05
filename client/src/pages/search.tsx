@@ -25,11 +25,7 @@ export default function Search() {
         className="relative py-12 bg-cover bg-center"
         style={{
           backgroundColor: 'rgb(0, 0, 0)',
-          backgroundImage: to.toLowerCase() === 'paris' 
-            ? 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2000&q=80")'
-            : to.toLowerCase() === 'london'
-            ? 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80")'
-            : 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80")'
+          backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80")'
         }}
       >
         <div className="container mx-auto px-4">

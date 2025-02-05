@@ -4,9 +4,15 @@ import { storage } from "./storage";
 
 export function registerRoutes(app: Express) {
   app.get("/api/destinations", async (req, res) => {
-    const from = req.query.from as string | undefined;
-    const to = req.query.to as string | undefined;
-    const destinations = await storage.searchDestinations({ from, to });
+    const { from, to, departureDate, returnDate, passengers, class: travelClass } = req.query;
+    const destinations = await storage.searchDestinations({ 
+      from: from as string, 
+      to: to as string,
+      departureDate: departureDate ? new Date(departureDate as string) : undefined,
+      returnDate: returnDate ? new Date(returnDate as string) : undefined,
+      passengers: passengers ? parseInt(passengers as string) : undefined,
+      travelClass: travelClass as string | undefined
+    });
     res.json(destinations);
   });
 

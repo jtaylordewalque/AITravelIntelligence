@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, MapPin, Plus, Minus, Users, Settings2 } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Plus, Minus, Users, Settings2, ChevronDown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const searchSchema = z.object({
   origin: z.string().min(2, "Please enter at least 2 characters"),
@@ -273,41 +274,68 @@ export function SearchForm() {
               type="button"
               variant="outline"
               size="sm"
-              className="flex items-center gap-2"
+              className={cn(
+                "flex items-center gap-2 group transition-colors",
+                showAdvanced && "bg-muted"
+              )}
               onClick={() => setShowAdvanced(!showAdvanced)}
             >
               <Settings2 className="h-4 w-4" />
               {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
+              <ChevronDown 
+                className={cn(
+                  "h-4 w-4 transition-transform duration-200",
+                  showAdvanced && "rotate-180"
+                )} 
+              />
             </Button>
           </div>
 
-          {showAdvanced && (
-            <div className="space-y-4 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.watch("flexibleDates")}
-                    onCheckedChange={(checked) => form.setValue("flexibleDates", checked)}
-                  />
-                  <span className="text-sm">Flexible dates (±3 days)</span>
-                </div>
+          <AnimatePresence>
+            {showAdvanced && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={form.watch("flexibleDates")}
+                          onCheckedChange={(checked) => form.setValue("flexibleDates", checked)}
+                        />
+                        <div>
+                          <p className="font-medium">Flexible dates</p>
+                          <p className="text-sm text-muted-foreground">Search within ±3 days</p>
+                        </div>
+                      </div>
+                    </div>
 
-                <Select
-                  value={form.watch("connectionPreference")}
-                  onValueChange={(value: any) => form.setValue("connectionPreference", value)}
-                >
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Connection preference" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="shorter">Shorter connections</SelectItem>
-                    <SelectItem value="longer">Longer connections</SelectItem>
-                    <SelectItem value="any">No preference</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
+                    <div className="bg-muted/50 p-3 rounded-lg">
+                      <p className="font-medium mb-2">Connection preference</p>
+                      <Select
+                        value={form.watch("connectionPreference")}
+                        onValueChange={(value: any) => form.setValue("connectionPreference", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select preference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="shorter">Shorter connections</SelectItem>
+                          <SelectItem value="longer">Longer connections</SelectItem>
+                          <SelectItem value="any">No preference</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </form>
       </Form>
     </div>

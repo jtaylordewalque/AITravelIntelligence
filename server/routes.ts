@@ -4,8 +4,9 @@ import { storage } from "./storage";
 
 export function registerRoutes(app: Express) {
   app.get("/api/destinations", async (req, res) => {
-    const query = req.query.q as string || "";
-    const destinations = await storage.searchDestinations(query);
+    const from = req.query.from as string | undefined;
+    const to = req.query.to as string | undefined;
+    const destinations = await storage.searchDestinations({ from, to });
     res.json(destinations);
   });
 

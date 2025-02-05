@@ -6,22 +6,24 @@ import { type Destination } from "@shared/schema";
 
 export default function Search() {
   const [location] = useLocation();
-  const query = new URLSearchParams(location.split("?")[1]).get("q") || "";
+  const params = new URLSearchParams(location.split("?")[1]);
+  const from = params.get("from") || "";
+  const to = params.get("to") || "";
 
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", query],
+    queryKey: ["/api/destinations", { from, to }],
   });
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-xl mx-auto mb-8">
+        <div className="max-w-2xl mx-auto mb-8">
           <SearchForm />
         </div>
 
         <div className="mb-6">
           <h2 className="text-2xl font-bold">
-            Search Results for "{query}"
+            Routes from {from} to {to}
           </h2>
         </div>
 
@@ -36,9 +38,9 @@ export default function Search() {
             {results?.map(destination => (
               <DestinationCard key={destination.id} destination={destination} />
             ))}
-            {results?.length === 0 && (
+            {(!results || results.length === 0) && (
               <p className="col-span-full text-center text-muted-foreground">
-                No destinations found matching your search.
+                No routes found between {from} and {to}. Try different cities or explore our popular destinations.
               </p>
             )}
           </div>

@@ -6,43 +6,69 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 
 const searchSchema = z.object({
-  query: z.string().min(2, "Please enter at least 2 characters"),
+  origin: z.string().min(2, "Please enter at least 2 characters"),
+  destination: z.string().min(2, "Please enter at least 2 characters"),
 });
+
+type SearchFormData = z.infer<typeof searchSchema>;
 
 export function SearchForm() {
   const [, setLocation] = useLocation();
-  
-  const form = useForm<z.infer<typeof searchSchema>>({
+
+  const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      query: "",
+      origin: "",
+      destination: "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof searchSchema>) {
-    setLocation(`/search?q=${encodeURIComponent(data.query)}`);
+  function onSubmit(data: SearchFormData) {
+    const searchParams = new URLSearchParams({
+      from: data.origin,
+      to: data.destination,
+    });
+    setLocation(`/search?${searchParams.toString()}`);
   }
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="query"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Where do you want to go?</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Search destinations..." {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full">Search</Button>
+            <div className="flex gap-4 items-end">
+              <FormField
+                control={form.control}
+                name="origin"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>From</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter origin city..." {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <ArrowRight className="mb-3" />
+
+              <FormField
+                control={form.control}
+                name="destination"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>To</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter destination city..." {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button type="submit" className="w-full">Search Routes</Button>
           </form>
         </Form>
       </CardContent>

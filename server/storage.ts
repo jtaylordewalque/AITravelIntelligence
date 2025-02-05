@@ -1,7 +1,7 @@
 import { type Destination, type TransportMode, type Activity, type SearchResult } from "@shared/schema";
 
 export interface IStorage {
-  searchDestinations(query: string): Promise<Destination[]>;
+  searchDestinations(params: { from?: string; to?: string }): Promise<Destination[]>;
   getPopularDestinations(): Promise<Destination[]>;
   getTransportModes(): Promise<TransportMode[]>;
   getActivities(): Promise<Activity[]>;
@@ -11,23 +11,23 @@ export class MemStorage implements IStorage {
   private destinations: Destination[] = [
     {
       id: 1,
-      name: "Santorini, Greece",
-      description: "Beautiful island with white buildings and blue domes",
-      imageUrl: "https://images.unsplash.com/photo-1530789253388-582c481c54b0",
-      price: 1200,
+      name: "Paris to London",
+      description: "Experience the charm of Paris and London with this route",
+      imageUrl: "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b",
+      price: 200,
       rating: 5,
-      tags: ["beach", "romantic", "scenic"],
+      tags: ["train", "scenic", "historic"],
     },
     {
       id: 2,
-      name: "Swiss Alps",
-      description: "Majestic mountain ranges perfect for hiking and skiing",
-      imageUrl: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1",
-      price: 1500,
-      rating: 5,
-      tags: ["mountains", "adventure", "nature"],
+      name: "London to Amsterdam",
+      description: "Connect two iconic European capitals by train or plane",
+      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      price: 250,
+      rating: 4,
+      tags: ["train", "plane", "city"],
     },
-    // Add more destinations...
+    // Add more routes...
   ];
 
   private transportModes: TransportMode[] = [
@@ -45,34 +45,37 @@ export class MemStorage implements IStorage {
       imageUrl: "https://images.unsplash.com/photo-1553027578-a8a2b2b13329",
       price: 500,
     },
-    // Add more transport modes...
   ];
 
   private activities: Activity[] = [
     {
       id: 1,
-      name: "Mountain Hiking",
-      description: "Guided hiking tour through scenic trails",
-      imageUrl: "https://images.unsplash.com/photo-1465310477141-6fb93167a273",
-      price: 100,
+      name: "City Tour",
+      description: "Explore the city's landmarks and hidden gems",
+      imageUrl: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a",
+      price: 50,
       duration: 4,
     },
     {
       id: 2,
-      name: "Cultural Tour",
-      description: "Explore local history and traditions",
-      imageUrl: "https://images.unsplash.com/photo-1480480565647-1c4385c7c0bf",
+      name: "Food Tour",
+      description: "Taste local specialties and learn about food culture",
+      imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
       price: 80,
       duration: 3,
     },
-    // Add more activities...
   ];
 
-  async searchDestinations(query: string): Promise<Destination[]> {
-    return this.destinations.filter(d => 
-      d.name.toLowerCase().includes(query.toLowerCase()) ||
-      d.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-    );
+  async searchDestinations({ from, to }: { from?: string; to?: string }): Promise<Destination[]> {
+    if (!from && !to) return this.destinations;
+
+    return this.destinations.filter(d => {
+      const nameLower = d.name.toLowerCase();
+      const descLower = d.description.toLowerCase();
+      const fromMatch = !from || nameLower.includes(from.toLowerCase()) || descLower.includes(from.toLowerCase());
+      const toMatch = !to || nameLower.includes(to.toLowerCase()) || descLower.includes(to.toLowerCase());
+      return fromMatch && toMatch;
+    });
   }
 
   async getPopularDestinations(): Promise<Destination[]> {

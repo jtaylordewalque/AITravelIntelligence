@@ -10,12 +10,13 @@ type DestinationImages = {
 };
 
 const getDestinationImage = (destination: string): string => {
+  const cleanDestination = destination.trim().toLowerCase();
   const images: DestinationImages = {
-    'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2000&q=80", // Eiffel Tower
-    'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80", // London Bridge
-    'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80", // Generic travel image
+    'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2000&q=80",
+    'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80",
+    'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80",
   };
-  return images[destination.toLowerCase()] || images.default;
+  return images[cleanDestination] || images.default;
 };
 
 export default function Search() {
@@ -32,12 +33,14 @@ export default function Search() {
     queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
   });
 
+  const backgroundImage = getDestinationImage(to);
+
   return (
     <div className="min-h-screen bg-background">
       <div 
         className="relative py-12"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${getDestinationImage(to)})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("${backgroundImage}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

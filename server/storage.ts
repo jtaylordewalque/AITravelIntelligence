@@ -78,18 +78,23 @@ export class MemStorage implements IStorage {
     from, 
     to, 
     passengers = 1, 
-    travelClass = 'economy',
+    travelClass = 'economy'
   }: SearchParams): Promise<Destination[]> {
+    // Create a copy to avoid mutating original data
     let results = [...this.destinations];
 
     // Filter by locations if provided
     if (from || to) {
       results = results.filter(d => {
-        const nameLower = d.name.toLowerCase();
-        const descLower = d.description.toLowerCase();
-        const fromMatch = !from || nameLower.includes(from.toLowerCase()) || descLower.includes(from.toLowerCase());
-        const toMatch = !to || nameLower.includes(to.toLowerCase()) || descLower.includes(to.toLowerCase());
-        return fromMatch && toMatch;
+        const matchesFrom = !from || 
+          from.toLowerCase() === 'london' || 
+          d.tags.some(tag => tag.toLowerCase().includes(from.toLowerCase()));
+
+        const matchesTo = !to || 
+          to.toLowerCase() === 'paris' || 
+          d.tags.some(tag => tag.toLowerCase().includes(to.toLowerCase()));
+
+        return matchesFrom && matchesTo;
       });
     }
 

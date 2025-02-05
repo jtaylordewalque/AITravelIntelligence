@@ -8,14 +8,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 
 interface SearchResultsProps {
-  query: string;
-  className?: string;
   from: string;
   to: string;
   passengers: number;
   departureDate?: Date | null;
   returnDate?: Date | null;
   travelClass: string;
+  className?: string;
 }
 
 const getTransportIcon = (tags: string[]) => {
@@ -32,16 +31,17 @@ export function SearchResults({
   passengers,
   departureDate,
   returnDate,
-  travelClass
+  travelClass,
+  className
 }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
+    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, class: travelClass }],
   });
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[...Array(4)].map((_, i) => (
+      <div className={cn("space-y-4", className)}>
+        {[...Array(3)].map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6">
               <Skeleton className="h-24 w-full" />
@@ -65,56 +65,54 @@ export function SearchResults({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4">
-        {results.map((route) => (
-          <Card key={route.id} className="hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex flex-wrap gap-6 items-center">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-primary/10 rounded-full text-primary">
-                    {getTransportIcon(route.tags)}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold capitalize">
-                      {route.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {route.tags.find(tag => tag.includes('min'))}
-                    </p>
-                  </div>
+    <div className={cn("space-y-4", className)}>
+      {results.map((route) => (
+        <Card key={route.id} className="hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-6 items-center">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 rounded-full text-primary">
+                  {getTransportIcon(route.tags)}
                 </div>
-
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">{route.description}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {route.tags
-                      .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
-                      .map(tag => (
-                        <Badge key={tag} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-2xl font-bold">£{route.price}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {passengers > 1 ? `${passengers} passengers` : 'per person'}
-                  </div>
-                  {departureDate && (
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {format(departureDate, 'MMM d')}
-                      {returnDate && ` - ${format(returnDate, 'MMM d')}`}
-                    </div>
-                  )}
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {route.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {route.tags.find(tag => tag.includes('min'))}
+                  </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">{route.description}</p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {route.tags
+                    .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
+                    .map(tag => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="text-2xl font-bold">£{route.price}</div>
+                <div className="text-sm text-muted-foreground">
+                  {passengers > 1 ? `${passengers} passengers` : 'per person'}
+                </div>
+                {departureDate && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {format(departureDate, 'MMM d')}
+                    {returnDate && ` - ${format(returnDate, 'MMM d')}`}
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { type Destination } from "@shared/schema";
 import { DestinationCard } from "@/components/destination-card";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SearchResultsProps {
   query: string;
@@ -26,29 +28,32 @@ export function SearchResults({ query, className }: SearchResultsProps) {
 
   if (isLoading) {
     return (
-      <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
-        {[...Array(6)].map((_, i) => (
-          <div 
-            key={i} 
-            className="h-[400px] bg-muted rounded-lg overflow-hidden"
-          >
-            <div className="w-full h-[200px] bg-accent animate-pulse" />
-            <div className="p-6 space-y-4">
-              <div className="h-6 bg-accent w-3/4 animate-pulse rounded" />
-              <div className="space-y-2">
-                <div className="h-4 bg-accent w-full animate-pulse rounded" />
-                <div className="h-4 bg-accent w-5/6 animate-pulse rounded" />
-              </div>
-              <div className="flex justify-between items-center pt-4">
-                <div className="flex gap-2">
-                  <div className="h-6 w-16 bg-accent animate-pulse rounded-full" />
-                  <div className="h-6 w-16 bg-accent animate-pulse rounded-full" />
+      <div className={cn("space-y-6", className)}>
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-[400px] bg-card rounded-lg overflow-hidden border">
+              <Skeleton className="w-full h-48" />
+              <div className="p-6 space-y-4">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
                 </div>
-                <div className="h-6 w-20 bg-accent animate-pulse rounded" />
+                <div className="flex justify-between items-center pt-4">
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-6 w-20" />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
@@ -57,7 +62,7 @@ export function SearchResults({ query, className }: SearchResultsProps) {
     return (
       <div className={cn("text-center p-8", className)}>
         <p className="text-muted-foreground text-lg">
-          No destinations found matching "{query}".
+          No destinations found matching your search.
         </p>
         <p className="text-sm text-muted-foreground mt-2">
           Try adjusting your search terms or explore our popular destinations below.
@@ -67,15 +72,32 @@ export function SearchResults({ query, className }: SearchResultsProps) {
   }
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
-      {results.map((destination) => (
-        <div 
-          key={destination.id}
-          className="transform hover:-translate-y-1 transition-transform duration-200"
-        >
-          <DestinationCard destination={destination} />
-        </div>
-      ))}
+    <div className={cn("space-y-6", className)}>
+      <div className="flex justify-between items-center">
+        <p className="text-lg font-medium">
+          Found {results.length} route{results.length === 1 ? "" : "s"}
+        </p>
+        <Select defaultValue="price">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="price">Sort by Price</SelectItem>
+            <SelectItem value="rating">Sort by Rating</SelectItem>
+            <SelectItem value="duration">Sort by Duration</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {results.map((destination) => (
+          <div 
+            key={destination.id}
+            className="transform hover:-translate-y-1 transition-transform duration-200"
+          >
+            <DestinationCard destination={destination} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

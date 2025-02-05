@@ -3,15 +3,19 @@ import { useLocation } from "wouter";
 import { SearchForm } from "@/components/search-form";
 import { DestinationCard } from "@/components/destination-card";
 import { type Destination } from "@shared/schema";
+import { format } from "date-fns";
 
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
   const from = params.get("from") || "";
   const to = params.get("to") || "";
+  const date = params.get("date") ? new Date(params.get("date")!) : null;
+  const passengers = parseInt(params.get("passengers") || "1");
+  const travelClass = params.get("class") || "economy";
 
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to }],
+    queryKey: ["/api/destinations", { from, to, date, passengers, travelClass }],
   });
 
   return (
@@ -21,10 +25,13 @@ export default function Search() {
           <SearchForm />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 space-y-2">
           <h2 className="text-2xl font-bold">
             Routes from {from} to {to}
           </h2>
+          <p className="text-muted-foreground">
+            {date ? format(date, "EEEE, MMMM d, yyyy") : "Any date"} · {passengers} passenger{passengers !== 1 ? "s" : ""} · {travelClass.charAt(0).toUpperCase() + travelClass.slice(1)} class
+          </p>
         </div>
 
         {isLoading ? (

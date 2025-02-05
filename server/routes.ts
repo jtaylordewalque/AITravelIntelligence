@@ -4,13 +4,66 @@ import { storage } from "./storage";
 import { getTravelSuggestions } from "./openai";
 
 export function registerRoutes(app: Express) {
+  // New endpoint for location suggestions
+  app.get("/api/locations/suggestions", async (req, res) => {
+    const query = req.query.q as string;
+    if (!query || query.length < 2) {
+      return res.json([]);
+    }
+
+    const mockLocations = [
+      { id: 1, name: "London, United Kingdom", code: "LON" },
+      { id: 2, name: "Paris, France", code: "PAR" },
+      { id: 3, name: "New York, USA", code: "NYC" },
+      { id: 4, name: "Tokyo, Japan", code: "TYO" },
+      { id: 5, name: "Berlin, Germany", code: "BER" },
+      { id: 6, name: "Rome, Italy", code: "ROM" },
+      { id: 7, name: "Madrid, Spain", code: "MAD" },
+      { id: 8, name: "Amsterdam, Netherlands", code: "AMS" },
+    ].filter(location => 
+      location.name.toLowerCase().includes(query.toLowerCase())
+    );
+
+    res.json(mockLocations);
+  });
+
   app.get("/api/destinations", async (req, res) => {
     const from = req.query.from as string | undefined;
     const to = req.query.to as string | undefined;
-    const destinations = await storage.searchDestinations({ from, to });
-    res.json(destinations);
+
+    if (!from || !to) {
+      const destinations = await storage.getPopularDestinations();
+      return res.json(destinations);
+    }
+
+    const mockRoutes = [
+      {
+        id: 1,
+        price: 150,
+        rating: 5,
+        description: "Direct high-speed train. Most popular route.",
+        tags: ["train", "direct", "120min", "eco-friendly"],
+      },
+      {
+        id: 2,
+        price: 89,
+        rating: 4,
+        description: "Budget airline with good service.",
+        tags: ["plane", "direct", "90min", "budget"],
+      },
+      {
+        id: 3,
+        price: 45,
+        rating: 3,
+        description: "Long-distance coach service.",
+        tags: ["bus", "scenic", "240min", "budget"],
+      },
+    ];
+
+    res.json(mockRoutes);
   });
 
+  // Keep existing endpoints
   app.get("/api/popular", async (req, res) => {
     const destinations = await storage.getPopularDestinations();
     res.json(destinations);
@@ -26,7 +79,6 @@ export function registerRoutes(app: Express) {
     res.json(activities);
   });
 
-  // New route for AI travel suggestions
   app.get("/api/travel-suggestions", async (req, res) => {
     try {
       const prompt = req.query.prompt as string;

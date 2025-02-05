@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LocationInput } from "@/components/location-input";
 
 const searchSchema = z.object({
   origin: z.string().min(2, "Please enter at least 2 characters"),
@@ -75,14 +76,12 @@ export function SearchForm() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="From"
-                        className="pl-9"
-                        {...field}
-                      />
-                    </div>
+                    <LocationInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="From"
+                      icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -94,14 +93,12 @@ export function SearchForm() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="To"
-                        className="pl-9"
-                        {...field}
-                      />
-                    </div>
+                    <LocationInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="To"
+                      icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -282,11 +279,11 @@ export function SearchForm() {
             >
               <Settings2 className="h-4 w-4" />
               {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
-              <ChevronDown 
+              <ChevronDown
                 className={cn(
                   "h-4 w-4 transition-transform duration-200",
                   showAdvanced && "rotate-180"
-                )} 
+                )}
               />
             </Button>
           </div>

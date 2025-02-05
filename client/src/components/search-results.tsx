@@ -40,8 +40,8 @@ const formatDate = (dateString: string) => {
 
 export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", searchParams],
-    enabled: !!searchParams,
+    queryKey: ["/api/destinations", searchParams?.from, searchParams?.to],
+    enabled: !!(searchParams?.from && searchParams?.to),
   });
 
   if (isLoading) {
@@ -95,7 +95,7 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                   <p className="text-sm text-muted-foreground">Dates</p>
                   <p className="font-medium">
                     {formatDate(searchParams.departureDate)}
-                    {searchParams.returnDate && formatDate(searchParams.returnDate) && ` - ${formatDate(searchParams.returnDate)}`}
+                    {searchParams.returnDate && ` - ${formatDate(searchParams.returnDate)}`}
                   </p>
                 </div>
               </div>
@@ -157,9 +157,9 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                 <div className="flex items-center gap-6 ml-auto">
                   <div className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{searchParams?.from || route.from}</span>
+                      <span className="font-medium">{route.from}</span>
                       <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{searchParams?.to || route.to}</span>
+                      <span className="font-medium">{route.to}</span>
                     </div>
                   </div>
                   <div className="text-right">

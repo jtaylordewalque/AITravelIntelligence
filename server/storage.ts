@@ -19,6 +19,8 @@ export class MemStorage implements IStorage {
       price: 80,
       rating: 5,
       tags: ["train", "2h 24min"],
+      from: "London",
+      to: "Paris",
     },
     {
       id: 2,
@@ -28,6 +30,8 @@ export class MemStorage implements IStorage {
       price: 26,
       rating: 4,
       tags: ["bus", "7h 55min"],
+      from: "Madrid",
+      to: "Barcelona",
     },
     {
       id: 3,
@@ -37,6 +41,8 @@ export class MemStorage implements IStorage {
       price: 25,
       rating: 3,
       tags: ["rideshare", "5h 49min"],
+      from: "Berlin",
+      to: "Munich",
     },
     {
       id: 4,
@@ -46,6 +52,8 @@ export class MemStorage implements IStorage {
       price: 69,
       rating: 4,
       tags: ["plane", "4h 15min"],
+      from: "London",
+      to: "Madrid",
     },
     {
       id: 5,
@@ -55,6 +63,8 @@ export class MemStorage implements IStorage {
       price: 91,
       rating: 4,
       tags: ["car", "eurotunnel", "4h 41min"],
+      from: "Paris",
+      to: "London",
     },
     {
       id: 6,
@@ -64,8 +74,40 @@ export class MemStorage implements IStorage {
       price: 91,
       rating: 3,
       tags: ["car", "ferry", "5h 52min"],
+      from: "Amsterdam",
+      to: "London",
     }
   ];
+
+  async searchDestinations({ from, to }: { from?: string; to?: string }): Promise<Destination[]> {
+    if (!from && !to) return this.destinations;
+
+    return this.destinations.filter(d => {
+      const fromMatch = !from || d.from.toLowerCase().includes(from.toLowerCase());
+      const toMatch = !to || d.to.toLowerCase().includes(to.toLowerCase());
+      return fromMatch && toMatch;
+    });
+  }
+
+  async getPopularDestinations(): Promise<Destination[]> {
+    return this.destinations;
+  }
+
+  async getTransportModes(): Promise<TransportMode[]> {
+    return this.transportModes;
+  }
+
+  async getActivities(): Promise<Activity[]> {
+    return this.activities;
+  }
+
+  async getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]> {
+    return this.routeSegments;
+  }
+
+  async getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]> {
+    return this.combinedRoutes;
+  }
 
   private transportModes: TransportMode[] = [
     {
@@ -97,38 +139,6 @@ export class MemStorage implements IStorage {
       price: 25,
     }
   ];
-
-  async searchDestinations({ from, to }: { from?: string; to?: string }): Promise<Destination[]> {
-    if (!from && !to) return this.destinations;
-
-    return this.destinations.filter(d => {
-      const nameLower = d.name.toLowerCase();
-      const descLower = d.description.toLowerCase();
-      const fromMatch = !from || nameLower.includes(from.toLowerCase()) || descLower.includes(from.toLowerCase());
-      const toMatch = !to || nameLower.includes(to.toLowerCase()) || descLower.includes(to.toLowerCase());
-      return fromMatch && toMatch;
-    });
-  }
-
-  async getPopularDestinations(): Promise<Destination[]> {
-    return this.destinations;
-  }
-
-  async getTransportModes(): Promise<TransportMode[]> {
-    return this.transportModes;
-  }
-
-  async getActivities(): Promise<Activity[]> {
-    return this.activities;
-  }
-
-  async getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]> {
-    return this.routeSegments;
-  }
-
-  async getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]> {
-    return this.combinedRoutes;
-  }
 
   private activities: Activity[] = [
     {

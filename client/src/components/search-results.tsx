@@ -2,10 +2,9 @@ import { type Destination } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star } from "lucide-react";
+import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { format } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface SearchResultsProps {
   query: string;
@@ -61,31 +60,33 @@ export function SearchResults({ query, className }: SearchResultsProps) {
 
   if (!results?.length) {
     return (
-      <div className="text-center p-8 border-2 border-dashed rounded-lg">
-        <p className="text-lg font-semibold">No routes found</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Try adjusting your search or explore our popular destinations
-        </p>
+      <div className="text-center p-12 border-2 border-dashed rounded-lg bg-background/50 backdrop-blur-sm">
+        <div className="max-w-md mx-auto">
+          <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-xl font-semibold">No routes found</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Try adjusting your search criteria or explore our popular destinations
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
-      <h2 className="text-2xl font-bold mb-6">Available Routes</h2>
-      <div className="space-y-6">
+    <div className={cn("space-y-8", className)}>
+      <div className="grid gap-6">
         {results.map((route) => (
-          <Card key={route.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+          <Card key={route.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
             <div className="grid md:grid-cols-[1fr_2fr] gap-6">
-              <div className="aspect-[4/3] relative overflow-hidden">
-                <img
-                  src={getTransportImage(route.tags)}
+              <div className="aspect-video md:aspect-square relative overflow-hidden">
+                <img 
+                  src={getTransportImage(route.tags)} 
                   alt={route.name}
-                  className="object-cover w-full h-full"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 {route.rating === 5 && (
                   <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <Badge variant="secondary" className="bg-green-500/90 text-white backdrop-blur-sm border-none">
                       <Star className="w-4 h-4 mr-1 fill-current" />
                       BEST OPTION
                     </Badge>
@@ -93,9 +94,9 @@ export function SearchResults({ query, className }: SearchResultsProps) {
                 )}
               </div>
 
-              <div className="p-6">
+              <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-primary/10 rounded-full text-primary">
+                  <div className="p-2.5 bg-primary/10 rounded-full text-primary">
                     {getTransportIcon(route.tags)}
                   </div>
                   <div>
@@ -106,12 +107,22 @@ export function SearchResults({ query, className }: SearchResultsProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                   <Clock className="w-4 h-4" />
                   <span>{getDuration(route.tags)}</span>
                 </div>
 
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {route.tags
+                    .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
+                    .map(tag => (
+                      <Badge key={tag} variant="secondary" className="capitalize">
+                        {tag}
+                      </Badge>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">London</span>
                     <ArrowRight className="w-4 h-4 text-muted-foreground" />
@@ -122,7 +133,7 @@ export function SearchResults({ query, className }: SearchResultsProps) {
                     <div className="text-sm text-muted-foreground">per person</div>
                   </div>
                 </div>
-              </div>
+              </CardContent>
             </div>
           </Card>
         ))}

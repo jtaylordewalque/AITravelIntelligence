@@ -5,6 +5,15 @@ import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
 import { format } from "date-fns";
 
+const getDestinationImage = (destination: string) => {
+  const images = {
+    'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34", // Eiffel Tower
+    'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad", // London Bridge
+    'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800", // Generic travel image
+  };
+  return images[destination.toLowerCase()] || images.default;
+};
+
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
@@ -24,7 +33,7 @@ export default function Search() {
       <div 
         className="relative py-12"
         style={{
-          backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(https://images.unsplash.com/photo-1469854523086-cc02fe5d8800)",
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${getDestinationImage(to)})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

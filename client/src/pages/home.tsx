@@ -21,22 +21,22 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <div 
-        className="relative h-[60vh] flex items-center justify-center"
+        className="relative min-h-[400px] md:min-h-[500px] flex items-center justify-center px-4 py-16"
         style={{
           backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(https://images.unsplash.com/photo-1469854523086-cc02fe5d8800)",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="text-center text-white mb-8 z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+        <div className="text-center text-white max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 mt-8">
             Voyage Genius
           </h1>
           <p className="text-lg md:text-xl mb-8">
             Time for your next adventure<br />
             Let us plan it for you
           </p>
-          <div className="max-w-xl mx-auto px-4">
+          <div className="max-w-xl mx-auto">
             <SearchForm />
           </div>
         </div>

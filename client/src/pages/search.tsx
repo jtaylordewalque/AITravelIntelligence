@@ -5,37 +5,37 @@ import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
 import { format } from "date-fns";
 
+const getDestinationImage = (destination: string) => {
+  const images = {
+    'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34", // Eiffel Tower
+    'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad", // London Bridge
+    'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800", // Generic travel image
+  };
+  return images[destination.toLowerCase()] || images.default;
+};
+
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
-
-  // Get and format search parameters
-  const from = decodeURIComponent(params.get("from") || "");
-  const to = decodeURIComponent(params.get("to") || "");
+  const from = params.get("from") || "";
+  const to = params.get("to") || "";
   const departureDate = params.get("departureDate") ? new Date(params.get("departureDate")!) : null;
   const returnDate = params.get("returnDate") ? new Date(params.get("returnDate")!) : null;
   const passengers = parseInt(params.get("passengers") || "1");
   const travelClass = params.get("class") || "economy";
 
-  // Capitalize first letter of each word in city names
-  const formatCity = (city: string) => {
-    return city
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-  };
-
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, class: travelClass }],
+    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
   });
 
   return (
     <div className="min-h-screen bg-background">
       <div 
-        className="relative py-12 bg-cover bg-center"
+        className="relative py-12"
         style={{
-          backgroundColor: 'rgb(0, 0, 0)',
-          backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=2000&q=80")'
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${getDestinationImage(to)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         <div className="container mx-auto px-4">
@@ -55,10 +55,10 @@ export default function Search() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 mb-8 border">
-          <h2 className="text-2xl font-bold mb-2">
-            Routes from {formatCity(from)} to {formatCity(to)}
+          <h2 className="text-2xl font-bold">
+            Routes from {from} to {to}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}
             {returnDate && ` → ${format(returnDate, "EEEE, MMMM d, yyyy")}`} · 
             {passengers} passenger{passengers !== 1 ? "s" : ""} · 
@@ -66,14 +66,9 @@ export default function Search() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl">
           <SearchResults 
-            from={from}
-            to={to}
-            passengers={passengers}
-            departureDate={departureDate}
-            returnDate={returnDate}
-            travelClass={travelClass}
+            query={`${from} ${to}`} 
             className={isLoading ? "opacity-50" : ""}
           />
         </div>

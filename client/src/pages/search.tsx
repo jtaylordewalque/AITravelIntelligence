@@ -25,9 +25,6 @@ export default function Search() {
       .join(' ');
   };
 
-  const formattedFrom = from ? formatCity(from) : null;
-  const formattedTo = to ? formatCity(to) : null;
-
   const { data: results, isLoading } = useQuery<Destination[]>({
     queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, class: travelClass }],
   });
@@ -59,11 +56,7 @@ export default function Search() {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 mb-8 border">
           <h2 className="text-2xl font-bold mb-2">
-            {formattedFrom || formattedTo ? (
-              <>Routes from {formattedFrom || "anywhere"} to {formattedTo || "anywhere"}</>
-            ) : (
-              "Searching all routes"
-            )}
+            Routes from {formatCity(from)} to {formatCity(to)}
           </h2>
           <p className="text-muted-foreground">
             {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}

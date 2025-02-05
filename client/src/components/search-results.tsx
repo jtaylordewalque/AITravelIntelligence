@@ -5,16 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
 
 interface SearchResultsProps {
   query: string;
   className?: string;
   from: string;
   to: string;
-  passengers?: number;
+  passengers: number;
   departureDate?: Date | null;
   returnDate?: Date | null;
-  travelClass?: string;
+  travelClass: string;
 }
 
 const getTransportIcon = (tags: string[]) => {
@@ -25,46 +26,25 @@ const getTransportIcon = (tags: string[]) => {
   return <Car className="h-6 w-6" />;
 };
 
-const getDuration = (tags: string[]) => {
-  return tags.find(tag => tag.includes('min')) || '';
-};
-
 export function SearchResults({ 
-  query, 
-  className, 
   from, 
   to, 
-  passengers = 1,
+  passengers,
   departureDate,
   returnDate,
-  travelClass = 'economy'
+  travelClass
 }: SearchResultsProps) {
-  // Update the query to include all search parameters
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: [
-      "/api/destinations", 
-      {
-        from,
-        to,
-        departureDate: departureDate?.toISOString(),
-        returnDate: returnDate?.toISOString(),
-        passengers,
-        class: travelClass
-      }
-    ],
+    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
   });
 
   if (isLoading) {
     return (
-      <div className={cn("space-y-4", className)}>
+      <div className="space-y-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
+          <Card key={i}>
             <CardContent className="p-6">
-              <div className="space-y-4">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-1/4" />
-              </div>
+              <Skeleton className="h-24 w-full" />
             </CardContent>
           </Card>
         ))}
@@ -74,23 +54,21 @@ export function SearchResults({
 
   if (!results?.length) {
     return (
-      <div className="text-center p-12 border-2 border-dashed rounded-lg bg-background/50 backdrop-blur-sm">
-        <div className="max-w-md mx-auto">
-          <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-xl font-semibold">No routes found</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Try adjusting your search criteria or explore our popular destinations
-          </p>
-        </div>
+      <div className="text-center p-12 border-2 border-dashed rounded-lg">
+        <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <p className="text-xl font-semibold">No routes found</p>
+        <p className="text-muted-foreground mt-2">
+          Try adjusting your search criteria
+        </p>
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className="space-y-4">
       <div className="grid gap-4">
         {results.map((route) => (
-          <Card key={route.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
+          <Card key={route.id} className="hover:shadow-lg transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex flex-wrap gap-6 items-center">
                 <div className="flex items-center gap-3">
@@ -98,49 +76,39 @@ export function SearchResults({
                     {getTransportIcon(route.tags)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
-                      {route.tags.find(tag => ['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))}
-                      {route.rating === 5 && (
-                        <Badge variant="secondary" className="bg-green-500/90 text-white border-none">
-                          <Star className="w-3 h-3 mr-1 fill-current" />
-                          BEST
-                        </Badge>
-                      )}
+                    <h3 className="text-lg font-semibold capitalize">
+                      {route.name}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span>{getDuration(route.tags)}</span>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {route.tags.find(tag => tag.includes('min'))}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex-1 min-w-[200px]">
-                  <p className="text-sm text-muted-foreground mb-2">{route.description}</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">{route.description}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
                     {route.tags
                       .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
                       .map(tag => (
-                        <Badge key={tag} variant="secondary" className="capitalize">
+                        <Badge key={tag} variant="secondary">
                           {tag}
                         </Badge>
                       ))}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 ml-auto">
-                  <div className="text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{from}</span>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{to}</span>
-                    </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">£{route.price}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {passengers > 1 ? `${passengers} passengers` : 'per person'}
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">£{route.price}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {passengers > 1 ? `£${Math.round(route.price / passengers)} × ${passengers} passengers` : 'per person'}
+                  {departureDate && (
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {format(departureDate, 'MMM d')}
+                      {returnDate && ` - ${format(returnDate, 'MMM d')}`}
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </CardContent>

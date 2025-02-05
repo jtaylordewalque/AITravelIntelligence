@@ -74,6 +74,53 @@ export class MemStorage implements IStorage {
     }
   ];
 
+  async searchDestinations({ 
+    from, 
+    to, 
+    passengers = 1, 
+    travelClass = 'economy',
+  }: SearchParams): Promise<Destination[]> {
+    let results = [...this.destinations];
+
+    // Filter by locations if provided
+    if (from || to) {
+      results = results.filter(d => {
+        const nameLower = d.name.toLowerCase();
+        const descLower = d.description.toLowerCase();
+        const fromMatch = !from || nameLower.includes(from.toLowerCase()) || descLower.includes(from.toLowerCase());
+        const toMatch = !to || nameLower.includes(to.toLowerCase()) || descLower.includes(to.toLowerCase());
+        return fromMatch && toMatch;
+      });
+    }
+
+    // Adjust prices based on travel class and passengers
+    const classMultipliers = {
+      'economy': 1,
+      'business': 2.5,
+      'first': 4
+    };
+
+    const multiplier = classMultipliers[travelClass as keyof typeof classMultipliers] || 1;
+
+    // Return modified results with adjusted prices
+    return results.map(dest => ({
+      ...dest,
+      price: Math.round(dest.price * multiplier * passengers)
+    }));
+  }
+
+  async getPopularDestinations(): Promise<Destination[]> {
+    return this.destinations;
+  }
+
+  async getTransportModes(): Promise<TransportMode[]> {
+    return this.transportModes;
+  }
+
+  async getActivities(): Promise<Activity[]> {
+    return this.activities;
+  }
+
   private transportModes: TransportMode[] = [
     {
       id: 1,
@@ -104,56 +151,6 @@ export class MemStorage implements IStorage {
       price: 25,
     }
   ];
-
-  async searchDestinations({ 
-    from, 
-    to, 
-    passengers = 1, 
-    travelClass = 'economy',
-    departureDate,
-    returnDate 
-  }: SearchParams): Promise<Destination[]> {
-    let results = [...this.destinations]; // Create a copy to avoid mutating original data
-
-    // Filter by locations if provided
-    if (from || to) {
-      results = results.filter(d => {
-        const nameLower = d.name.toLowerCase();
-        const descLower = d.description.toLowerCase();
-        const fromMatch = !from || nameLower.includes(from.toLowerCase()) || descLower.includes(from.toLowerCase());
-        const toMatch = !to || nameLower.includes(to.toLowerCase()) || descLower.includes(to.toLowerCase());
-        return fromMatch && toMatch;
-      });
-    }
-
-    // Adjust prices based on travel class
-    const classMultipliers = {
-      'economy': 1,
-      'business': 2.5,
-      'first': 4
-    };
-
-    const multiplier = classMultipliers[travelClass as keyof typeof classMultipliers] || 1;
-
-    // Return modified results with adjusted prices based on travel class and number of passengers
-    return results.map(dest => ({
-      ...dest,
-      // Calculate total price based on class and number of passengers
-      price: Math.round(dest.price * multiplier * passengers)
-    }));
-  }
-
-  async getPopularDestinations(): Promise<Destination[]> {
-    return this.destinations;
-  }
-
-  async getTransportModes(): Promise<TransportMode[]> {
-    return this.transportModes;
-  }
-
-  async getActivities(): Promise<Activity[]> {
-    return this.activities;
-  }
 
   private activities: Activity[] = [
     {

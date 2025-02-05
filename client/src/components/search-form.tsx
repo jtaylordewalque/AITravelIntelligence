@@ -2,11 +2,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, MapPin, Plus, Minus, Users, Settings2, ChevronDown } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Minus, Users, Settings2, ChevronDown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -15,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PlacesAutocomplete } from "./places-autocomplete";
 
 const searchSchema = z.object({
   origin: z.string().min(2, "Please enter at least 2 characters"),
@@ -67,7 +66,6 @@ export function SearchForm() {
     <div className="w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* From and To fields in one row */}
           <div className="flex gap-4">
             <FormField
               control={form.control}
@@ -75,14 +73,11 @@ export function SearchForm() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="From"
-                        className="pl-9"
-                        {...field}
-                      />
-                    </div>
+                    <PlacesAutocomplete
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="From"
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -94,21 +89,17 @@ export function SearchForm() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="To"
-                        className="pl-9"
-                        {...field}
-                      />
-                    </div>
+                    <PlacesAutocomplete
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="To"
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
           </div>
 
-          {/* Depart and Return dates in one row */}
           <div className="flex gap-4">
             <FormField
               control={form.control}
@@ -198,7 +189,6 @@ export function SearchForm() {
             />
           </div>
 
-          {/* Passengers and Class in one row */}
           <div className="flex gap-4">
             <FormField
               control={form.control}
@@ -282,11 +272,11 @@ export function SearchForm() {
             >
               <Settings2 className="h-4 w-4" />
               {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
-              <ChevronDown 
+              <ChevronDown
                 className={cn(
                   "h-4 w-4 transition-transform duration-200",
                   showAdvanced && "rotate-180"
-                )} 
+                )}
               />
             </Button>
           </div>

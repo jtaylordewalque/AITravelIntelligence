@@ -22,6 +22,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
+  const uniqueId = useRef(`places-autocomplete-${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
     if (window.google?.maps?.places) {
@@ -63,15 +64,24 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
 
   // Initialize autocomplete when the script is loaded
   useEffect(() => {
-    if (!scriptLoaded || !inputRef.current || autocompleteRef.current) return;
+    if (!scriptLoaded || !inputRef.current) return;
 
     try {
+      // Cleanup previous instance if it exists
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+
+      // Create new instance
       autocompleteRef.current = new window.google.maps.places.Autocomplete(
         inputRef.current,
         { types: ['(cities)'] }
       );
 
-      autocompleteRef.current.addListener('place_changed', () => {
+      // Add unique data attribute to help identify this instance
+      inputRef.current.setAttribute('data-autocomplete-id', uniqueId.current);
+
+      const listener = autocompleteRef.current.addListener('place_changed', () => {
         const place = autocompleteRef.current.getPlace();
         if (place?.formatted_address) {
           onChange(place.formatted_address);
@@ -79,6 +89,12 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
           onChange(place.name);
         }
       });
+
+      return () => {
+        if (autocompleteRef.current) {
+          google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        }
+      };
     } catch (error) {
       console.error('Error initializing Places Autocomplete:', error);
       setError('Error initializing Places Autocomplete');

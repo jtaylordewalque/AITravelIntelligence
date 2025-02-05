@@ -17,49 +17,53 @@ interface PlacesAutocompleteProps {
   className?: string;
 }
 
-export function PlacesAutocomplete({ value, onChange, placeholder, className }: PlacesAutocompleteProps) {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<any>(null);
+let scriptPromise: Promise<void> | null = null;
 
-  useEffect(() => {
+const loadPlacesScript = () => {
+  if (scriptPromise) return scriptPromise;
+
+  scriptPromise = new Promise((resolve, reject) => {
     if (window.google?.maps?.places) {
-      setScriptLoaded(true);
+      resolve();
       return;
     }
 
     const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
     if (!apiKey) {
-      setError('Google Places API key is missing');
+      reject(new Error('Google Places API key is missing'));
       return;
     }
 
-    if (!document.querySelector('#google-places-script')) {
-      window.initGooglePlaces = () => {
-        setScriptLoaded(true);
-      };
+    window.initGooglePlaces = () => resolve();
 
-      const script = document.createElement('script');
-      script.id = 'google-places-script';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGooglePlaces`;
-      script.async = true;
-      script.defer = true;
-      script.onerror = () => {
-        setError('Failed to load Google Places API');
-      };
-      document.head.appendChild(script);
+    const script = document.createElement('script');
+    script.id = 'google-places-script';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGooglePlaces`;
+    script.async = true;
+    script.onerror = () => reject(new Error('Failed to load Google Places API'));
+    document.head.appendChild(script);
+  });
 
-      return () => {
-        window.initGooglePlaces = undefined;
-        const script = document.querySelector('#google-places-script');
-        if (script) script.remove();
-      };
-    }
+  return scriptPromise;
+};
+
+export function PlacesAutocomplete({ value, onChange, placeholder, className }: PlacesAutocompleteProps) {
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<any>(null);
+
+  useEffect(() => {
+    loadPlacesScript()
+      .then(() => setIsReady(true))
+      .catch(error => {
+        console.error('Error loading Places API:', error);
+        setError(error.message);
+      });
   }, []);
 
   useEffect(() => {
-    if (!scriptLoaded || !inputRef.current) return;
+    if (!isReady || !inputRef.current) return;
 
     try {
       if (autocompleteRef.current) {
@@ -89,7 +93,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
       console.error('Error initializing Places Autocomplete:', error);
       setError('Error initializing Places Autocomplete');
     }
-  }, [scriptLoaded, onChange]);
+  }, [isReady, onChange]);
 
   return (
     <div className={cn("relative", className)}>
@@ -100,8 +104,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={cn("pl-9", !scriptLoaded && "opacity-50 cursor-not-allowed")}
-        disabled={!scriptLoaded}
+        className="pl-9"
       />
       {error && (
         <div className="absolute w-full mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">

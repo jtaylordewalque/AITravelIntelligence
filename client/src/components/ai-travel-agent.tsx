@@ -15,6 +15,15 @@ export function AiTravelAgent() {
   const { data: suggestions, refetch, isFetching } = useQuery<TravelSuggestion>({
     queryKey: ["/api/travel-suggestions", prompt],
     enabled: false,
+    queryFn: async () => {
+      const params = new URLSearchParams({ prompt });
+      const response = await fetch(`/api/travel-suggestions?${params.toString()}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to get suggestions');
+      }
+      return response.json();
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +35,15 @@ export function AiTravelAgent() {
       });
       return;
     }
-    await refetch();
+    try {
+      await refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to get travel suggestions",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { SearchForm } from "@/components/search-form";
 import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
 import { format } from "date-fns";
+import { Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const getDestinationImage = (destination: string) => {
   const images: Record<string, string> = {
@@ -39,6 +41,14 @@ export default function Search() {
         }}
       >
         <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <Link href="/">
+              <Button variant="outline" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-white/20">
+                <Home className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
           <div className="text-center text-white mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Voyage Genius

@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Users, Plus, Minus } from "lucide-react";
+import { ArrowRight, Users, Plus, Minus, Settings2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 
 const searchSchema = z.object({
@@ -23,6 +24,8 @@ const searchSchema = z.object({
   returnDate: z.date().optional(),
   passengers: z.number().min(1).max(9),
   class: z.enum(["economy", "business", "first"]),
+  flexibleDates: z.boolean().default(false),
+  connectionPreference: z.enum(["shorter", "longer", "any"]).default("any"),
 }).refine((data) => {
   if (data.returnDate) {
     return data.returnDate > data.departureDate;
@@ -39,6 +42,7 @@ export function SearchForm() {
   const [, setLocation] = useLocation();
   const [departureDateOpen, setDepartureDateOpen] = useState(false);
   const [returnDateOpen, setReturnDateOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
@@ -47,6 +51,8 @@ export function SearchForm() {
       destination: "Paris",
       passengers: 1,
       class: "economy",
+      flexibleDates: false,
+      connectionPreference: "any",
     },
   });
 
@@ -58,6 +64,8 @@ export function SearchForm() {
       ...(data.returnDate && { returnDate: data.returnDate.toISOString() }),
       passengers: data.passengers.toString(),
       class: data.class,
+      flexibleDates: data.flexibleDates.toString(),
+      connectionPreference: data.connectionPreference,
     });
     setLocation(`/search?${searchParams.toString()}`);
   }
@@ -253,7 +261,69 @@ export function SearchForm() {
                 )}
               />
             </div>
-            <Button type="submit" className="w-full">Search Routes</Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                <Settings2 className="h-4 w-4" />
+                Advanced Search
+              </Button>
+            </div>
+
+            {showAdvanced && (
+              <div className="space-y-4 pt-4 border-t">
+                <FormField
+                  control={form.control}
+                  name="flexibleDates"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between">
+                      <div>
+                        <FormLabel>Flexible Travel Days</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Show options ±3 days around selected dates
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="connectionPreference"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Connection Preference</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select preference" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="shorter">Prefer Shorter Connections</SelectItem>
+                          <SelectItem value="longer">Prefer Longer Connections</SelectItem>
+                          <SelectItem value="any">No Preference</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            <Button type="submit" className="w-full">
+              Explore All Routes
+            </Button>
           </form>
         </Form>
       </CardContent>

@@ -8,6 +8,8 @@ import { format } from "date-fns";
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
+
+  // Get all search parameters
   const from = params.get("from") || "";
   const to = params.get("to") || "";
   const departureDate = params.get("departureDate") ? new Date(params.get("departureDate")!) : null;
@@ -16,7 +18,7 @@ export default function Search() {
   const travelClass = params.get("class") || "economy";
 
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
+    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, class: travelClass }],
   });
 
   return (
@@ -46,7 +48,7 @@ export default function Search() {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 mb-8 border">
           <h2 className="text-2xl font-bold mb-2">
-            Routes from {from.charAt(0).toUpperCase() + from.slice(1)} to {to.charAt(0).toUpperCase() + to.slice(1)}
+            Routes from {from || "anywhere"} to {to || "anywhere"}
           </h2>
           <p className="text-muted-foreground">
             {departureDate ? format(departureDate, "EEEE, MMMM d, yyyy") : "Any date"}
@@ -58,14 +60,13 @@ export default function Search() {
 
         <div className="max-w-4xl mx-auto">
           <SearchResults 
-            query={`${from} ${to}`} 
-            className={isLoading ? "opacity-50" : ""}
-            from={from.charAt(0).toUpperCase() + from.slice(1)}
-            to={to.charAt(0).toUpperCase() + to.slice(1)}
+            from={from}
+            to={to}
             passengers={passengers}
             departureDate={departureDate}
             returnDate={returnDate}
             travelClass={travelClass}
+            className={isLoading ? "opacity-50" : ""}
           />
         </div>
       </div>

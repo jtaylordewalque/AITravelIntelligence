@@ -1,8 +1,7 @@
 import * as React from "react"
 import { Command } from "cmdk"
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
 import {
   Command as CommandPrimitive,
@@ -11,7 +10,6 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface LocationInputProps {
   value: string
@@ -26,8 +24,8 @@ export function LocationInput({
   placeholder,
   icon
 }: LocationInputProps) {
-  const [open, setOpen] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState("")
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   const { data: locations, isLoading } = useQuery({
     queryKey: ['/api/locations/suggestions', searchTerm],
@@ -41,61 +39,53 @@ export function LocationInput({
   })
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          <div className="flex items-center gap-2">
-            {icon}
-            <span className={cn(!value && "text-muted-foreground")}>
-              {value || placeholder || "Select location..."}
-            </span>
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <CommandPrimitive>
+    <div className="relative">
+      <CommandPrimitive className="relative">
+        <div className="flex items-center border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+          {icon && <div className="pl-3">{icon}</div>}
           <CommandInput
-            placeholder="Search location..."
+            ref={inputRef}
             value={searchTerm}
             onValueChange={setSearchTerm}
+            placeholder={placeholder}
+            className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          <CommandEmpty>
-            {isLoading ? (
-              <div className="flex items-center justify-center p-4">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            ) : (
-              "No location found."
-            )}
-          </CommandEmpty>
-          <CommandGroup>
-            {locations?.map((location: any) => (
-              <CommandItem
-                key={location.id}
-                value={location.name}
-                onSelect={() => {
-                  onChange(location.name)
-                  setOpen(false)
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === location.name ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {location.name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandPrimitive>
-      </PopoverContent>
-    </Popover>
+        </div>
+        {(searchTerm.length >= 2 && (locations?.length > 0 || isLoading)) && (
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover text-popover-foreground shadow-md rounded-md overflow-hidden">
+            <CommandEmpty>
+              {isLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                "No location found."
+              )}
+            </CommandEmpty>
+            <CommandGroup className="max-h-[200px] overflow-y-auto">
+              {locations?.map((location: any) => (
+                <CommandItem
+                  key={location.id}
+                  value={location.name}
+                  onSelect={(value) => {
+                    onChange(value)
+                    setSearchTerm(value)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === location.name ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {location.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </div>
+        )}
+      </CommandPrimitive>
+    </div>
   )
 }

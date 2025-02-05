@@ -3,28 +3,39 @@ import { createServer } from "http";
 import { storage } from "./storage";
 import { getTravelSuggestions } from "./openai";
 
+// Mock database of cities
+const cities = [
+  { id: 1, name: "London, United Kingdom", code: "LON" },
+  { id: 2, name: "Paris, France", code: "PAR" },
+  { id: 3, name: "New York, USA", code: "NYC" },
+  { id: 4, name: "Tokyo, Japan", code: "TYO" },
+  { id: 5, name: "Berlin, Germany", code: "BER" },
+  { id: 6, name: "Rome, Italy", code: "ROM" },
+  { id: 7, name: "Madrid, Spain", code: "MAD" },
+  { id: 8, name: "Amsterdam, Netherlands", code: "AMS" },
+  { id: 9, name: "Singapore", code: "SIN" },
+  { id: 10, name: "Dubai, UAE", code: "DXB" },
+  { id: 11, name: "Sydney, Australia", code: "SYD" },
+  { id: 12, name: "Hong Kong", code: "HKG" },
+  { id: 13, name: "Bangkok, Thailand", code: "BKK" },
+  { id: 14, name: "Istanbul, Turkey", code: "IST" },
+  { id: 15, name: "Mumbai, India", code: "BOM" },
+  // Add more cities as needed
+];
+
 export function registerRoutes(app: Express) {
-  // New endpoint for location suggestions
+  // Location suggestions endpoint
   app.get("/api/locations/suggestions", async (req, res) => {
     const query = req.query.q as string;
     if (!query || query.length < 2) {
       return res.json([]);
     }
 
-    const mockLocations = [
-      { id: 1, name: "London, United Kingdom", code: "LON" },
-      { id: 2, name: "Paris, France", code: "PAR" },
-      { id: 3, name: "New York, USA", code: "NYC" },
-      { id: 4, name: "Tokyo, Japan", code: "TYO" },
-      { id: 5, name: "Berlin, Germany", code: "BER" },
-      { id: 6, name: "Rome, Italy", code: "ROM" },
-      { id: 7, name: "Madrid, Spain", code: "MAD" },
-      { id: 8, name: "Amsterdam, Netherlands", code: "AMS" },
-    ].filter(location => 
-      location.name.toLowerCase().includes(query.toLowerCase())
+    const suggestions = cities.filter(city =>
+      city.name.toLowerCase().includes(query.toLowerCase())
     );
 
-    res.json(mockLocations);
+    res.json(suggestions);
   });
 
   app.get("/api/destinations", async (req, res) => {
@@ -36,26 +47,34 @@ export function registerRoutes(app: Express) {
       return res.json(destinations);
     }
 
+    // Generate routes based on the selected cities
+    const fromCity = cities.find(c => c.name === from);
+    const toCity = cities.find(c => c.name === to);
+
+    if (!fromCity || !toCity) {
+      return res.status(400).json({ message: "Invalid city selection" });
+    }
+
     const mockRoutes = [
       {
         id: 1,
-        price: 150,
+        price: Math.floor(Math.random() * 200) + 100, // Random price between 100-300
         rating: 5,
-        description: "Direct high-speed train. Most popular route.",
+        description: `Direct high-speed train from ${fromCity.name} to ${toCity.name}.`,
         tags: ["train", "direct", "120min", "eco-friendly"],
       },
       {
         id: 2,
-        price: 89,
+        price: Math.floor(Math.random() * 150) + 50, // Random price between 50-200
         rating: 4,
-        description: "Budget airline with good service.",
+        description: `Budget airline connecting ${fromCity.name} to ${toCity.name}.`,
         tags: ["plane", "direct", "90min", "budget"],
       },
       {
         id: 3,
-        price: 45,
+        price: Math.floor(Math.random() * 80) + 30, // Random price between 30-110
         rating: 3,
-        description: "Long-distance coach service.",
+        description: `Long-distance coach service from ${fromCity.name} to ${toCity.name}.`,
         tags: ["bus", "scenic", "240min", "budget"],
       },
     ];

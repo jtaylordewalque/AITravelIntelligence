@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 interface SearchResultsProps {
   query: string;
   className?: string;
+  from: string;
+  to: string;
 }
 
 const getTransportIcon = (tags: string[]) => {
@@ -23,7 +25,7 @@ const getDuration = (tags: string[]) => {
   return tags.find(tag => tag.includes('min')) || '';
 };
 
-export function SearchResults({ query, className }: SearchResultsProps) {
+export function SearchResults({ query, className, from, to }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
     queryKey: ["/api/destinations", query],
     enabled: query.length > 0,
@@ -98,16 +100,16 @@ export function SearchResults({ query, className }: SearchResultsProps) {
                         <Badge key={tag} variant="secondary" className="capitalize">
                           {tag}
                         </Badge>
-                    ))}
+                      ))}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-6 ml-auto">
                   <div className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">London</span>
+                      <span className="font-medium">{from}</span>
                       <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">Paris</span>
+                      <span className="font-medium">{to}</span>
                     </div>
                   </div>
                   <div className="text-right">

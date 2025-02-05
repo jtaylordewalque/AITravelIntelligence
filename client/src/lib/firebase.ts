@@ -9,10 +9,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // Initialize App Check with reCAPTCHA v3
 export const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6LdZ9dEeAAAAAJDfl2Vta8oJ_HFqXC81Q1UoCa-K'), // Replace with your actual reCAPTCHA v3 site key
+  provider: new ReCaptchaV3Provider('AIzaSyCQ5jBL82pIO95eu87n7FOcJX2eXEC2QHw'),
   isTokenAutoRefreshEnabled: true
 });
+
+export { app };

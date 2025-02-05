@@ -2,12 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { cn } from "@/lib/utils";
 import { MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { getToken } from '@firebase/app-check';
-import { appCheck } from '@/lib/firebase';
 
 declare global {
   interface Window {
-    google: typeof google;
+    google: any;
     initGooglePlaces?: () => void;
   }
 }
@@ -23,7 +21,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const autocompleteRef = useRef<any>(null);
 
   useEffect(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
@@ -34,13 +32,8 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
 
     // Load the Google Maps JavaScript API
     if (!window.google && !document.querySelector('#google-places-script')) {
-      window.initGooglePlaces = async () => {
+      window.initGooglePlaces = () => {
         try {
-          // Configure Firebase App Check token for Google Maps
-          const appCheckToken = await getToken(appCheck, false);
-          const maps = await google.maps.importLibrary('maps') as { Map: any };
-          const places = await google.maps.importLibrary('places') as { Autocomplete: any };
-
           setScriptLoaded(true);
           setError(null);
         } catch (error) {

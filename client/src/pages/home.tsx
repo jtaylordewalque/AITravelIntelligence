@@ -30,10 +30,11 @@ export default function Home() {
       >
         <div className="text-center text-white mb-8 z-10">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Discover Your Next Adventure
+            Voyage Genius
           </h1>
           <p className="text-lg md:text-xl mb-8">
-            Find the perfect destination with AI-powered recommendations
+            Time for your next adventure<br />
+            Let us plan it for you
           </p>
           <div className="max-w-xl mx-auto px-4">
             <SearchForm />

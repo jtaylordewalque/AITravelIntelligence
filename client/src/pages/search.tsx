@@ -66,6 +66,10 @@ export default function Search() {
             className={isLoading ? "opacity-50" : ""}
             from={from.charAt(0).toUpperCase() + from.slice(1)}
             to={to.charAt(0).toUpperCase() + to.slice(1)}
+            passengers={passengers}
+            departureDate={departureDate}
+            returnDate={returnDate}
+            travelClass={travelClass}
           />
         </div>
       </div>

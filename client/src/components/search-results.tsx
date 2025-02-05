@@ -11,6 +11,10 @@ interface SearchResultsProps {
   className?: string;
   from: string;
   to: string;
+  passengers?: number;
+  departureDate?: Date | null;
+  returnDate?: Date | null;
+  travelClass?: string;
 }
 
 const getTransportIcon = (tags: string[]) => {
@@ -25,7 +29,16 @@ const getDuration = (tags: string[]) => {
   return tags.find(tag => tag.includes('min')) || '';
 };
 
-export function SearchResults({ query, className, from, to }: SearchResultsProps) {
+export function SearchResults({ 
+  query, 
+  className, 
+  from, 
+  to, 
+  passengers = 1,
+  departureDate,
+  returnDate,
+  travelClass = 'economy'
+}: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
     queryKey: ["/api/destinations", query],
     enabled: query.length > 0,
@@ -113,8 +126,10 @@ export function SearchResults({ query, className, from, to }: SearchResultsProps
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">£{route.price}</div>
-                    <div className="text-sm text-muted-foreground">per person</div>
+                    <div className="text-2xl font-bold">£{route.price * passengers}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {passengers > 1 ? `£${route.price} × ${passengers} passengers` : 'per person'}
+                    </div>
                   </div>
                 </div>
               </div>

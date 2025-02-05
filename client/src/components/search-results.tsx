@@ -2,7 +2,7 @@ import { type Destination } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star, MapPin, Calendar, Users } from "lucide-react";
+import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, MapPin, Calendar, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { format, isValid, parseISO } from "date-fns";
@@ -67,7 +67,7 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
 
   if (!results?.length) {
     return (
-      <div className="text-center p-12 border-2 border-dashed rounded-lg bg-background/50 backdrop-blur-sm">
+      <div className="text-center p-12 border-2 border-dashed rounded-lg bg-background/50">
         <div className="max-w-md mx-auto">
           <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-xl font-semibold">No routes found</p>
@@ -141,7 +141,7 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                   <p className="text-sm text-muted-foreground">{route.description}</p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {route.tags
-                      .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
+                      .filter(tag => !['train', 'bus', 'plane', 'car', 'ferry'].includes(tag))
                       .map(tag => (
                         <Badge key={tag} variant="secondary" className="capitalize">
                           {tag}

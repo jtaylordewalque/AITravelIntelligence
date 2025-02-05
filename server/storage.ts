@@ -1,4 +1,4 @@
-import { type Destination, type TransportMode, type Activity, type RouteSegment, type CombinedRoute } from "@shared/schema";
+import { type Destination, type TransportMode, type Activity } from "@shared/schema";
 
 export interface IStorage {
   searchDestinations(params: { from?: string; to?: string }): Promise<Destination[]>;

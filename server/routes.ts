@@ -25,6 +25,38 @@ export function registerRoutes(app: Express) {
     res.json(activities);
   });
 
+  app.get("/api/routes/combined", async (req, res) => {
+    const from = req.query.from as string;
+    const to = req.query.to as string;
+
+    if (!from || !to) {
+      return res.status(400).json({ message: "Both 'from' and 'to' parameters are required" });
+    }
+
+    const routes = await storage.getCombinedRoutes(from, to);
+    res.json(routes);
+  });
+
+  app.get("/api/routes/segments/:routeId", async (req, res) => {
+    const routeId = parseInt(req.params.routeId);
+    const route = (await storage.getCombinedRoutes("", ""))
+      .find(r => r.id === routeId);
+
+    if (!route) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+
+    // Get all segments for this route
+    const segments = await Promise.all(
+      route.segments.map(async (segmentId) => {
+        const allSegments = await storage.getRouteSegments("", "");
+        return allSegments.find(s => s.id === segmentId);
+      })
+    );
+
+    res.json(segments.filter(Boolean));
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

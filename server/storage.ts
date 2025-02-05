@@ -1,10 +1,12 @@
-import { type Destination, type TransportMode, type Activity, type SearchResult } from "@shared/schema";
+import { type Destination, type TransportMode, type Activity, type RouteSegment, type CombinedRoute } from "@shared/schema";
 
 export interface IStorage {
   searchDestinations(params: { from?: string; to?: string }): Promise<Destination[]>;
   getPopularDestinations(): Promise<Destination[]>;
   getTransportModes(): Promise<TransportMode[]>;
   getActivities(): Promise<Activity[]>;
+  getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]>;
+  getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -27,7 +29,6 @@ export class MemStorage implements IStorage {
       rating: 4,
       tags: ["train", "plane", "city"],
     },
-    // Add more routes...
   ];
 
   private transportModes: TransportMode[] = [
@@ -47,22 +48,37 @@ export class MemStorage implements IStorage {
     },
   ];
 
-  private activities: Activity[] = [
+  private routeSegments: RouteSegment[] = [
     {
       id: 1,
-      name: "City Tour",
-      description: "Explore the city's landmarks and hidden gems",
-      imageUrl: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a",
-      price: 50,
-      duration: 4,
+      startLocation: "London",
+      endLocation: "Paris",
+      transportModeId: 2, // train
+      duration: 144, // 2h 24min
+      price: 80,
+      departureTime: "09:00",
+      arrivalTime: "11:24",
     },
     {
       id: 2,
-      name: "Food Tour",
-      description: "Taste local specialties and learn about food culture",
-      imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-      price: 80,
-      duration: 3,
+      startLocation: "Paris",
+      endLocation: "Amsterdam",
+      transportModeId: 1, // flight
+      duration: 80, // 1h 20min
+      price: 120,
+      departureTime: "13:00",
+      arrivalTime: "14:20",
+    },
+  ];
+
+  private combinedRoutes: CombinedRoute[] = [
+    {
+      id: 1,
+      name: "London to Amsterdam via Paris",
+      totalPrice: 200,
+      totalDuration: 264, // 4h 24min total
+      segments: [1, 2], // references to routeSegments
+      rating: 4,
     },
   ];
 
@@ -89,6 +105,47 @@ export class MemStorage implements IStorage {
   async getActivities(): Promise<Activity[]> {
     return this.activities;
   }
+
+  async getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]> {
+    return this.routeSegments.filter(
+      segment => 
+        segment.startLocation.toLowerCase() === startLocation.toLowerCase() &&
+        segment.endLocation.toLowerCase() === endLocation.toLowerCase()
+    );
+  }
+
+  async getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]> {
+    // For now, return all combined routes that include segments matching the from/to locations
+    return this.combinedRoutes.filter(route => {
+      const segments = route.segments.map(id => 
+        this.routeSegments.find(segment => segment.id === id)
+      );
+      const firstSegment = segments[0];
+      const lastSegment = segments[segments.length - 1];
+
+      return firstSegment?.startLocation.toLowerCase() === from.toLowerCase() &&
+             lastSegment?.endLocation.toLowerCase() === to.toLowerCase();
+    });
+  }
+
+  private activities: Activity[] = [
+    {
+      id: 1,
+      name: "City Tour",
+      description: "Explore the city's landmarks and hidden gems",
+      imageUrl: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a",
+      price: 50,
+      duration: 4,
+    },
+    {
+      id: 2,
+      name: "Food Tour",
+      description: "Taste local specialties and learn about food culture",
+      imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+      price: 80,
+      duration: 3,
+    },
+  ];
 }
 
 export const storage = new MemStorage();

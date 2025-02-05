@@ -68,6 +68,14 @@ export default function Search() {
           <SearchResults 
             query={`${from} ${to}`} 
             className={isLoading ? "opacity-50" : ""}
+            searchParams={{
+              from,
+              to,
+              departureDate: departureDate?.toISOString() || "",
+              ...(returnDate && { returnDate: returnDate.toISOString() }),
+              passengers,
+              class: travelClass,
+            }}
           />
         </div>
       </div>

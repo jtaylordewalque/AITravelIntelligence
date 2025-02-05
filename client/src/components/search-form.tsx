@@ -63,20 +63,21 @@ export function SearchForm() {
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-white/95 backdrop-blur-sm shadow-lg">
+    <Card className="w-full max-w-4xl mx-auto bg-white/95 backdrop-blur-sm">
       <CardContent className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex flex-wrap gap-4">
+            {/* From and To fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="origin"
                 render={({ field }) => (
-                  <FormItem className="flex-1 min-w-[200px]">
+                  <FormItem>
                     <FormControl>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
+                        <Input
                           placeholder="From"
                           className="pl-9"
                           {...field}
@@ -91,11 +92,11 @@ export function SearchForm() {
                 control={form.control}
                 name="destination"
                 render={({ field }) => (
-                  <FormItem className="flex-1 min-w-[200px]">
+                  <FormItem>
                     <FormControl>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
+                        <Input
                           placeholder="To"
                           className="pl-9"
                           {...field}
@@ -105,12 +106,15 @@ export function SearchForm() {
                   </FormItem>
                 )}
               />
+            </div>
 
+            {/* Depart and Return dates */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="departureDate"
                 render={({ field }) => (
-                  <FormItem className="flex-1 min-w-[150px]">
+                  <FormItem>
                     <Popover open={departureDateOpen} onOpenChange={setDepartureDateOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -153,7 +157,7 @@ export function SearchForm() {
                 control={form.control}
                 name="returnDate"
                 render={({ field }) => (
-                  <FormItem className="flex-1 min-w-[150px]">
+                  <FormItem>
                     <Popover open={returnDateOpen} onOpenChange={setReturnDateOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -192,12 +196,14 @@ export function SearchForm() {
                   </FormItem>
                 )}
               />
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="passengers"
                 render={({ field }) => (
-                  <FormItem className="w-[180px]">
+                  <FormItem>
                     <FormControl>
                       <div className="relative flex items-center">
                         <Button
@@ -240,7 +246,7 @@ export function SearchForm() {
                 control={form.control}
                 name="class"
                 render={({ field }) => (
-                  <FormItem className="w-[180px]">
+                  <FormItem>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -256,11 +262,11 @@ export function SearchForm() {
                   </FormItem>
                 )}
               />
-
-              <Button type="submit" className="px-8">
-                Search
-              </Button>
             </div>
+
+            <Button type="submit" className="w-full">
+              Explore all routes
+            </Button>
 
             <div className="flex items-center gap-2">
               <Button

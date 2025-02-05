@@ -2,13 +2,22 @@ import { type Destination } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star, MapPin } from "lucide-react";
+import { Train, Bus, Car, Plane, Ship, Clock, ArrowRight, Star, MapPin, Calendar, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
 
 interface SearchResultsProps {
   query: string;
   className?: string;
+  searchParams?: {
+    from: string;
+    to: string;
+    departureDate: string;
+    returnDate?: string;
+    passengers: number;
+    class: string;
+  };
 }
 
 const getTransportIcon = (tags: string[]) => {
@@ -23,7 +32,7 @@ const getDuration = (tags: string[]) => {
   return tags.find(tag => tag.includes('min')) || '';
 };
 
-export function SearchResults({ query, className }: SearchResultsProps) {
+export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
     queryKey: ["/api/destinations", query],
     enabled: query.length > 0,
@@ -63,6 +72,43 @@ export function SearchResults({ query, className }: SearchResultsProps) {
 
   return (
     <div className={cn("space-y-4", className)}>
+      {searchParams && (
+        <Card className="mb-6 bg-muted/30">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">From - To</p>
+                  <p className="font-medium">{searchParams.from} - {searchParams.to}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Dates</p>
+                  <p className="font-medium">
+                    {format(new Date(searchParams.departureDate), "PP")}
+                    {searchParams.returnDate && ` - ${format(new Date(searchParams.returnDate), "PP")}`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Passengers</p>
+                  <p className="font-medium">{searchParams.passengers} {searchParams.passengers === 1 ? 'passenger' : 'passengers'}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Class</p>
+                <p className="font-medium capitalize">{searchParams.class}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4">
         {results.map((route) => (
           <Card key={route.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
@@ -98,7 +144,7 @@ export function SearchResults({ query, className }: SearchResultsProps) {
                         <Badge key={tag} variant="secondary" className="capitalize">
                           {tag}
                         </Badge>
-                    ))}
+                      ))}
                   </div>
                 </div>
 

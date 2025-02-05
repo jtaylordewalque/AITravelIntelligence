@@ -25,6 +25,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
   const uniqueId = useRef(`places-autocomplete-${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
+    // If script is already loaded, enable the component
     if (window.google?.maps?.places) {
       setScriptLoaded(true);
       return;
@@ -36,7 +37,6 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
       return;
     }
 
-    // Load the Google Maps JavaScript API
     if (!document.querySelector('#google-places-script')) {
       window.initGooglePlaces = () => {
         setScriptLoaded(true);
@@ -62,7 +62,6 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
     }
   }, []);
 
-  // Initialize autocomplete when the script is loaded
   useEffect(() => {
     if (!scriptLoaded || !inputRef.current) return;
 
@@ -77,9 +76,6 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
         inputRef.current,
         { types: ['(cities)'] }
       );
-
-      // Add unique data attribute to help identify this instance
-      inputRef.current.setAttribute('data-autocomplete-id', uniqueId.current);
 
       const listener = autocompleteRef.current.addListener('place_changed', () => {
         const place = autocompleteRef.current.getPlace();
@@ -110,8 +106,8 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={cn("pl-9", scriptLoaded ? "" : "bg-muted")}
-        disabled={!scriptLoaded}
+        className="pl-9"
+        aria-label={placeholder}
       />
       {error && (
         <div className="absolute w-full mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">

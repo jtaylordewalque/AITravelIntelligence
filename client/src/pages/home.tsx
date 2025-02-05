@@ -3,6 +3,7 @@ import { SearchForm } from "@/components/search-form";
 import { DestinationCard } from "@/components/destination-card";
 import { TransportModeCard } from "@/components/transport-mode";
 import { ActivityCard } from "@/components/activity-card";
+import { AiTravelAgent } from "@/components/ai-travel-agent";
 import { type Destination, type TransportMode, type Activity } from "@shared/schema";
 
 export default function Home() {
@@ -43,6 +44,14 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-12">
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold mb-6">Not sure where to go?</h2>
+          <p className="text-lg text-muted-foreground mb-6">
+            Tell our AI Travel Agent about your ideal trip and get personalized suggestions
+          </p>
+          <AiTravelAgent />
+        </section>
+
         <section className="mb-12">
           <h2 className="text-3xl font-bold mb-6">Popular Destinations</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

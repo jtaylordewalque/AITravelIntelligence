@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer } from "http";
 import { storage } from "./storage";
+import { getTravelSuggestions } from "./openai";
 
 export function registerRoutes(app: Express) {
   app.get("/api/destinations", async (req, res) => {
@@ -25,6 +26,21 @@ export function registerRoutes(app: Express) {
     res.json(activities);
   });
 
+  // New route for AI travel suggestions
+  app.get("/api/travel-suggestions", async (req, res) => {
+    try {
+      const prompt = req.query.prompt as string;
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt is required" });
+      }
+      const suggestions = await getTravelSuggestions(prompt);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Error in travel suggestions:', error);
+      res.status(500).json({ message: "Failed to get travel suggestions" });
+    }
+  });
+
   app.get("/api/routes/combined", async (req, res) => {
     const from = req.query.from as string;
     const to = req.query.to as string;
@@ -46,7 +62,6 @@ export function registerRoutes(app: Express) {
       return res.status(404).json({ message: "Route not found" });
     }
 
-    // Get all segments for this route
     const segments = await Promise.all(
       route.segments.map(async (segmentId) => {
         const allSegments = await storage.getRouteSegments("", "");

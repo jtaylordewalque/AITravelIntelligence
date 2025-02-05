@@ -43,8 +43,8 @@ export function SearchForm() {
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      origin: "",
-      destination: "",
+      origin: "London",
+      destination: "Paris",
       passengers: 1,
       class: "economy",
     },

@@ -105,8 +105,15 @@ export class MemStorage implements IStorage {
     }
   ];
 
-  async searchDestinations({ from, to, passengers = 1, travelClass = 'economy' }: SearchParams): Promise<Destination[]> {
-    let results = this.destinations;
+  async searchDestinations({ 
+    from, 
+    to, 
+    passengers = 1, 
+    travelClass = 'economy',
+    departureDate,
+    returnDate 
+  }: SearchParams): Promise<Destination[]> {
+    let results = [...this.destinations]; // Create a copy to avoid mutating original data
 
     // Filter by locations if provided
     if (from || to) {
@@ -128,10 +135,11 @@ export class MemStorage implements IStorage {
 
     const multiplier = classMultipliers[travelClass as keyof typeof classMultipliers] || 1;
 
-    // Return modified results with adjusted prices
+    // Return modified results with adjusted prices based on travel class and number of passengers
     return results.map(dest => ({
       ...dest,
-      price: Math.round(dest.price * multiplier) // Adjust price based on class
+      // Calculate total price based on class and number of passengers
+      price: Math.round(dest.price * multiplier * passengers)
     }));
   }
 

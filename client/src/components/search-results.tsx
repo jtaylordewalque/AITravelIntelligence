@@ -39,9 +39,19 @@ export function SearchResults({
   returnDate,
   travelClass = 'economy'
 }: SearchResultsProps) {
+  // Update the query to include all search parameters
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", query],
-    enabled: query.length > 0,
+    queryKey: [
+      "/api/destinations", 
+      {
+        from,
+        to,
+        departureDate: departureDate?.toISOString(),
+        returnDate: returnDate?.toISOString(),
+        passengers,
+        class: travelClass
+      }
+    ],
   });
 
   if (isLoading) {
@@ -126,9 +136,9 @@ export function SearchResults({
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">£{route.price * passengers}</div>
+                    <div className="text-2xl font-bold">£{route.price}</div>
                     <div className="text-sm text-muted-foreground">
-                      {passengers > 1 ? `£${route.price} × ${passengers} passengers` : 'per person'}
+                      {passengers > 1 ? `£${Math.round(route.price / passengers)} × ${passengers} passengers` : 'per person'}
                     </div>
                   </div>
                 </div>

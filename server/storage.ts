@@ -5,16 +5,14 @@ export interface IStorage {
   getPopularDestinations(): Promise<Destination[]>;
   getTransportModes(): Promise<TransportMode[]>;
   getActivities(): Promise<Activity[]>;
-  getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]>;
-  getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]>;
 }
 
 export class MemStorage implements IStorage {
   private destinations: Destination[] = [
     {
       id: 1,
-      name: "Train route",
-      description: "Fast and comfortable train journey",
+      name: "London to Paris Express",
+      description: "Fast and comfortable train journey through the Channel Tunnel",
       imageUrl: "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b",
       price: 80,
       rating: 5,
@@ -24,8 +22,8 @@ export class MemStorage implements IStorage {
     },
     {
       id: 2,
-      name: "Bus route",
-      description: "Budget-friendly bus travel",
+      name: "Madrid Barcelona Route",
+      description: "Budget-friendly bus travel along Spain's beautiful countryside",
       imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
       price: 26,
       rating: 4,
@@ -35,56 +33,42 @@ export class MemStorage implements IStorage {
     },
     {
       id: 3,
-      name: "Rideshare option",
-      description: "Flexible rideshare journey",
-      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
-      price: 25,
-      rating: 3,
-      tags: ["rideshare", "5h 49min"],
-      from: "Berlin",
-      to: "Munich",
-    },
-    {
-      id: 4,
-      name: "Flight route",
-      description: "Quick air travel",
-      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      name: "London Madrid Flight",
+      description: "Quick and direct flight between capitals",
+      imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05",
       price: 69,
       rating: 4,
-      tags: ["plane", "4h 15min"],
+      tags: ["plane", "2h 15min"],
       from: "London",
       to: "Madrid",
     },
     {
-      id: 5,
-      name: "Drive via Eurotunnel",
+      id: 4,
+      name: "Paris London Return",
       description: "Self-drive option via Eurotunnel",
-      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
+      imageUrl: "https://images.unsplash.com/photo-1524850011238-e3d235c7d4c9",
       price: 91,
       rating: 4,
       tags: ["car", "eurotunnel", "4h 41min"],
       from: "Paris",
       to: "London",
     },
-    {
-      id: 6,
-      name: "Drive with ferry",
-      description: "Self-drive option with ferry crossing",
-      imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
-      price: 91,
-      rating: 3,
-      tags: ["car", "ferry", "5h 52min"],
-      from: "Amsterdam",
-      to: "London",
-    }
   ];
 
   async searchDestinations({ from, to }: { from?: string; to?: string }): Promise<Destination[]> {
     if (!from && !to) return this.destinations;
 
+    // Clean and normalize the search terms
+    const cleanFrom = from?.toLowerCase().trim() || '';
+    const cleanTo = to?.toLowerCase().trim() || '';
+
     return this.destinations.filter(d => {
-      const fromMatch = !from || d.from.toLowerCase().includes(from.toLowerCase());
-      const toMatch = !to || d.to.toLowerCase().includes(to.toLowerCase());
+      const fromMatch = !cleanFrom || 
+        d.from.toLowerCase().includes(cleanFrom) || 
+        cleanFrom.includes(d.from.toLowerCase());
+      const toMatch = !cleanTo || 
+        d.to.toLowerCase().includes(cleanTo) || 
+        cleanTo.includes(d.to.toLowerCase());
       return fromMatch && toMatch;
     });
   }
@@ -99,14 +83,6 @@ export class MemStorage implements IStorage {
 
   async getActivities(): Promise<Activity[]> {
     return this.activities;
-  }
-
-  async getRouteSegments(startLocation: string, endLocation: string): Promise<RouteSegment[]> {
-    return this.routeSegments;
-  }
-
-  async getCombinedRoutes(from: string, to: string): Promise<CombinedRoute[]> {
-    return this.combinedRoutes;
   }
 
   private transportModes: TransportMode[] = [
@@ -133,7 +109,7 @@ export class MemStorage implements IStorage {
     },
     {
       id: 4,
-      name: "Rideshare",
+      name: "Car",
       type: "car",
       imageUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
       price: 25,
@@ -158,9 +134,6 @@ export class MemStorage implements IStorage {
       duration: 3,
     },
   ];
-
-  private routeSegments: RouteSegment[] = [];
-  private combinedRoutes: CombinedRoute[] = [];
 }
 
 export const storage = new MemStorage();

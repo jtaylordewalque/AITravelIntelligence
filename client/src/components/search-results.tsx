@@ -40,20 +40,23 @@ const formatDate = (dateString: string) => {
 
 export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", searchParams?.from, searchParams?.to],
+    queryKey: ["/api/destinations", { from: searchParams?.from, to: searchParams?.to }],
     enabled: !!(searchParams?.from && searchParams?.to),
   });
 
   if (isLoading) {
     return (
       <div className={cn("space-y-4", className)}>
-        {[...Array(4)].map((_, i) => (
+        {[...Array(3)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <CardContent className="p-6">
-              <div className="space-y-4">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-1/4" />
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                <Skeleton className="h-8 w-24" />
               </div>
             </CardContent>
           </Card>
@@ -69,7 +72,8 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
           <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-xl font-semibold">No routes found</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Try adjusting your search criteria or explore our popular destinations
+            We couldn't find any routes between {searchParams?.from} and {searchParams?.to}.<br />
+            Try adjusting your search criteria or explore our popular destinations.
           </p>
         </div>
       </div>
@@ -79,31 +83,31 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
   return (
     <div className={cn("space-y-4", className)}>
       {searchParams && (
-        <Card className="mb-6 bg-muted/30">
+        <Card className="mb-6">
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">From - To</p>
-                  <p className="font-medium">{searchParams.from} - {searchParams.to}</p>
+                  <p className="text-sm text-muted-foreground">Route</p>
+                  <p className="font-medium">{searchParams.from} → {searchParams.to}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Dates</p>
+                  <p className="text-sm text-muted-foreground">Travel Date</p>
                   <p className="font-medium">
                     {formatDate(searchParams.departureDate)}
-                    {searchParams.returnDate && ` - ${formatDate(searchParams.returnDate)}`}
+                    {searchParams.returnDate && ` → ${formatDate(searchParams.returnDate)}`}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Passengers</p>
-                  <p className="font-medium">{searchParams.passengers} {searchParams.passengers === 1 ? 'passenger' : 'passengers'}</p>
+                  <p className="text-sm text-muted-foreground">Travelers</p>
+                  <p className="font-medium">{searchParams.passengers} {searchParams.passengers === 1 ? 'person' : 'people'}</p>
                 </div>
               </div>
               <div>
@@ -125,15 +129,7 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                     {getTransportIcon(route.tags)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
-                      {route.tags.find(tag => ['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))}
-                      {route.rating === 5 && (
-                        <Badge variant="secondary" className="bg-green-500/90 text-white border-none">
-                          <Star className="w-3 h-3 mr-1 fill-current" />
-                          BEST
-                        </Badge>
-                      )}
-                    </h3>
+                    <h3 className="text-lg font-semibold">{route.name}</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
                       <span>{getDuration(route.tags)}</span>

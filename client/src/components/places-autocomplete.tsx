@@ -17,6 +17,22 @@ interface PlacesAutocompleteProps {
   className?: string;
 }
 
+// Single instance of script loading promise
+const scriptLoaded = new Promise<void>((resolve, reject) => {
+  if (window.google?.maps?.places) {
+    resolve();
+    return;
+  }
+
+  window.initGooglePlaces = () => resolve();
+
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places&callback=initGooglePlaces`;
+  script.async = true;
+  document.head.appendChild(script);
+  script.onerror = () => reject(new Error('Failed to load Google Places API'));
+});
+
 export function PlacesAutocomplete({ value, onChange, placeholder, className }: PlacesAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
@@ -25,24 +41,7 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
   useEffect(() => {
     if (!inputRef.current) return;
 
-    if (!window.google?.maps?.places) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places`;
-      script.async = true;
-      document.head.appendChild(script);
-
-      script.onload = () => {
-        initializeAutocomplete();
-      };
-
-      script.onerror = () => {
-        setError('Error loading location search');
-      };
-    } else {
-      initializeAutocomplete();
-    }
-
-    function initializeAutocomplete() {
+    scriptLoaded.then(() => {
       if (autocompleteRef.current) {
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
@@ -60,7 +59,10 @@ export function PlacesAutocomplete({ value, onChange, placeholder, className }: 
           onChange(place.name);
         }
       });
-    }
+    }).catch(err => {
+      console.error('Places API Error:', err);
+      setError('Error initializing location search');
+    });
 
     return () => {
       if (autocompleteRef.current) {

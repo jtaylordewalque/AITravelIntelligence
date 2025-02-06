@@ -2,24 +2,43 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, Link } from "wouter";
 import { SearchForm } from "@/components/search-form";
 import { SearchResults } from "@/components/search-results";
+import { type Destination } from "@shared/schema";
 import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const getDestinationImage = (destination: string) => {
+  const images: Record<string, string> = {
+    'paris': "https://images.unsplash.com/photo-1502602898657-3e91760cbb34", // Eiffel Tower
+    'london': "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad", // London Bridge
+    'default': "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800", // Generic travel image
+  };
+  return images[destination.toLowerCase()] || images.default;
+};
 
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
-
   const from = params.get("from") || "";
   const to = params.get("to") || "";
-  const departureDate = params.get("departureDate") || "";
+  const departureDate = params.get("departureDate") ? new Date(params.get("departureDate")!) : null;
+  const returnDate = params.get("returnDate") ? new Date(params.get("returnDate")!) : null;
   const passengers = parseInt(params.get("passengers") || "1");
   const travelClass = params.get("class") || "economy";
 
-  const hasSearchParams = from && to && departureDate;
+  const { data: results, isLoading } = useQuery<Destination[]>({
+    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
+  });
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-[#042759] text-white py-12">
+      <div 
+        className="relative py-12"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${getDestinationImage(to)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <Link href="/">
@@ -29,17 +48,21 @@ export default function Search() {
               </Button>
             </Link>
           </div>
-
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-4xl font-bold text-center mb-8">
-              {hasSearchParams ? `${from} to ${to}` : 'Search Routes'}
+          <div className="text-center text-white mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              {from && to ? `${from} to ${to}` : 'Search Routes'}
             </h1>
-
+            <p className="text-lg md:text-xl">
+              {from && to ? `Discover the perfect route for your journey` : 'Enter your travel details'}
+            </p>
+          </div>
+          <div className="max-w-2xl mx-auto">
             <SearchForm 
               defaultValues={{
                 from,
                 to,
-                departureDate,
+                departureDate: departureDate?.toISOString().split('T')[0] || '',
+                returnDate: returnDate?.toISOString().split('T')[0] || '',
                 passengers: passengers.toString(),
                 class: travelClass,
               }}
@@ -48,19 +71,22 @@ export default function Search() {
         </div>
       </div>
 
-      {hasSearchParams && (
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-3xl mx-auto">
-            <SearchResults 
-              from={from}
-              to={to}
-              departureDate={departureDate}
-              passengers={passengers}
-              travelClass={travelClass}
-            />
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <SearchResults 
+            query={`${from} ${to}`} 
+            className={isLoading ? "opacity-50" : ""}
+            searchParams={{
+              from,
+              to,
+              departureDate: departureDate?.toISOString() || "",
+              ...(returnDate && { returnDate: returnDate.toISOString() }),
+              passengers,
+              class: travelClass,
+            }}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 }

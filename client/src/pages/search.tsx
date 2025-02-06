@@ -25,10 +25,19 @@ export default function Search() {
   const returnDate = params.get("returnDate") ? new Date(params.get("returnDate")!) : null;
   const passengers = parseInt(params.get("passengers") || "1");
   const travelClass = params.get("class") || "economy";
+  const flexibleDates = params.get("flexibleDates") === "true";
+  const connectionPreference = params.get("connectionPreference") || "any";
 
-  const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
-  });
+  const searchParams = {
+    from,
+    to,
+    departureDate: departureDate?.toISOString() || "",
+    ...(returnDate && { returnDate: returnDate.toISOString() }),
+    passengers,
+    class: travelClass,
+    flexibleDates,
+    connectionPreference,
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,18 +73,10 @@ export default function Search() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto">
           <SearchResults 
-            query={`${from} ${to}`} 
-            className={isLoading ? "opacity-50" : ""}
-            searchParams={{
-              from,
-              to,
-              departureDate: departureDate?.toISOString() || "",
-              ...(returnDate && { returnDate: returnDate.toISOString() }),
-              passengers,
-              class: travelClass,
-            }}
+            query={`${from} ${to}`}
+            searchParams={searchParams}
           />
         </div>
       </div>

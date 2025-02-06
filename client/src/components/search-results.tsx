@@ -51,8 +51,11 @@ const hasConnections = (tags: string[]) => {
 
 export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", searchParams],
-    enabled: Boolean(searchParams?.from && searchParams?.to),
+    queryKey: ["/api/destinations", { 
+      query,
+      ...searchParams
+    }],
+    enabled: query.length > 0,
   });
 
   if (isLoading) {
@@ -173,9 +176,9 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                 <div className="flex items-center gap-6 ml-auto">
                   <div className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{searchParams?.from}</span>
+                      <span className="font-medium">{searchParams?.from || 'Origin'}</span>
                       <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{searchParams?.to}</span>
+                      <span className="font-medium">{searchParams?.to || 'Destination'}</span>
                     </div>
                   </div>
                   <div className="text-right">

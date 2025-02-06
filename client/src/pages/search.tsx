@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 import { SearchForm } from "@/components/search-form";
 import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
 import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const getDestinationImage = (destination: string) => {
   const images: Record<string, string> = {
@@ -18,6 +19,8 @@ const getDestinationImage = (destination: string) => {
 export default function Search() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
+
+  // Get URL parameters
   const from = params.get("from") || "";
   const to = params.get("to") || "";
   const departureDate = params.get("departureDate") ? new Date(params.get("departureDate")!) : null;
@@ -25,8 +28,25 @@ export default function Search() {
   const passengers = parseInt(params.get("passengers") || "1");
   const travelClass = params.get("class") || "economy";
 
+  // State for real-time form values
+  const [currentSearch, setCurrentSearch] = useState({
+    from,
+    to,
+    departureDate,
+    returnDate,
+    passengers,
+    class: travelClass,
+  });
+
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", { from, to, departureDate, returnDate, passengers, travelClass }],
+    queryKey: ["/api/destinations", { 
+      from: currentSearch.from, 
+      to: currentSearch.to,
+      departureDate: currentSearch.departureDate,
+      returnDate: currentSearch.returnDate,
+      passengers: currentSearch.passengers,
+      class: currentSearch.class
+    }],
   });
 
   return (
@@ -34,7 +54,7 @@ export default function Search() {
       <div 
         className="relative py-12"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${getDestinationImage(to)})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${getDestinationImage(currentSearch.to || to)})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -50,21 +70,35 @@ export default function Search() {
           </div>
           <div className="text-center text-white mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {from && to ? `${from} to ${to}` : 'Search Routes'}
+              {currentSearch.from && currentSearch.to 
+                ? `${currentSearch.from} to ${currentSearch.to}` 
+                : 'Search Routes'}
             </h1>
             <p className="text-lg md:text-xl">
-              {from && to ? `Discover the perfect route for your journey` : 'Enter your travel details'}
+              {currentSearch.from && currentSearch.to 
+                ? `Discover the perfect route for your journey` 
+                : 'Enter your travel details'}
             </p>
           </div>
           <div className="max-w-2xl mx-auto">
             <SearchForm 
               defaultValues={{
-                from,
-                to,
+                origin: from,
+                destination: to,
                 departureDate: departureDate?.toISOString().split('T')[0] || '',
                 returnDate: returnDate?.toISOString().split('T')[0] || '',
                 passengers: passengers.toString(),
                 class: travelClass,
+              }}
+              onSearchChange={(data) => {
+                setCurrentSearch({
+                  from: data.origin || "",
+                  to: data.destination || "",
+                  departureDate: data.departureDate ? new Date(data.departureDate) : null,
+                  returnDate: data.returnDate ? new Date(data.returnDate) : null,
+                  passengers: parseInt(data.passengers || "1"),
+                  class: data.class || "economy",
+                });
               }}
             />
           </div>
@@ -74,15 +108,15 @@ export default function Search() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <SearchResults 
-            query={`${from} ${to}`} 
+            query={`${currentSearch.from} ${currentSearch.to}`} 
             className={isLoading ? "opacity-50" : ""}
             searchParams={{
-              from,
-              to,
-              departureDate: departureDate?.toISOString() || "",
-              ...(returnDate && { returnDate: returnDate.toISOString() }),
-              passengers,
-              class: travelClass,
+              from: currentSearch.from,
+              to: currentSearch.to,
+              departureDate: currentSearch.departureDate?.toISOString() || "",
+              ...(currentSearch.returnDate && { returnDate: currentSearch.returnDate.toISOString() }),
+              passengers: currentSearch.passengers,
+              class: currentSearch.class,
             }}
           />
         </div>

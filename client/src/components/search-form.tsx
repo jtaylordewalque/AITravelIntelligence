@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlacesAutocomplete } from "./places-autocomplete";
 
@@ -30,7 +30,12 @@ const searchSchema = z.object({
 
 type SearchFormData = z.infer<typeof searchSchema>;
 
-export function SearchForm() {
+interface SearchFormProps {
+  defaultValues?: Partial<SearchFormData>;
+  onSearchChange?: (data: Partial<SearchFormData>) => void;
+}
+
+export function SearchForm({ defaultValues, onSearchChange }: SearchFormProps) {
   const [, setLocation] = useLocation();
   const [departureDateOpen, setDepartureDateOpen] = useState(false);
   const [returnDateOpen, setReturnDateOpen] = useState(false);
@@ -39,14 +44,24 @@ export function SearchForm() {
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      origin: "",
-      destination: "",
-      passengers: 1,
-      class: "economy",
-      flexibleDates: false,
-      connectionPreference: "any",
+      origin: defaultValues?.origin || "",
+      destination: defaultValues?.destination || "",
+      passengers: defaultValues?.passengers || 1,
+      class: defaultValues?.class || "economy",
+      flexibleDates: defaultValues?.flexibleDates || false,
+      connectionPreference: defaultValues?.connectionPreference || "any",
     },
   });
+
+  // Watch form changes and notify parent
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (onSearchChange) {
+        onSearchChange(value);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch, onSearchChange]);
 
   function onSubmit(data: SearchFormData) {
     const searchParams = new URLSearchParams({

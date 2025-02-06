@@ -17,6 +17,8 @@ interface SearchResultsProps {
     returnDate?: string;
     passengers: number;
     class: string;
+    flexibleDates?: boolean;
+    connectionPreference?: string;
   };
 }
 
@@ -38,9 +40,21 @@ const formatDate = (dateString: string) => {
   return isValid(date) ? format(date, "PP") : '';
 };
 
+const getMainTransportMode = (tags: string[]) => {
+  const modes = ['train', 'bus', 'plane', 'ferry', 'car'];
+  return tags.find(tag => modes.includes(tag)) || 'multiple';
+};
+
+const hasConnections = (tags: string[]) => {
+  return tags.some(tag => tag.includes('connection'));
+};
+
 export function SearchResults({ query, className, searchParams }: SearchResultsProps) {
   const { data: results, isLoading } = useQuery<Destination[]>({
-    queryKey: ["/api/destinations", query],
+    queryKey: ["/api/destinations", { 
+      query,
+      ...searchParams
+    }],
     enabled: query.length > 0,
   });
 
@@ -126,11 +140,16 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
-                      {route.tags.find(tag => ['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))}
+                      {getMainTransportMode(route.tags)}
                       {route.rating === 5 && (
                         <Badge variant="secondary" className="bg-green-500/90 text-white border-none">
                           <Star className="w-3 h-3 mr-1 fill-current" />
                           BEST
+                        </Badge>
+                      )}
+                      {hasConnections(route.tags) && (
+                        <Badge variant="outline" className="ml-2">
+                          Connection
                         </Badge>
                       )}
                     </h3>
@@ -145,7 +164,7 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                   <p className="text-sm text-muted-foreground">{route.description}</p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {route.tags
-                      .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag))
+                      .filter(tag => !['train', 'bus', 'plane', 'car', 'rideshare'].includes(tag) && !tag.includes('min'))
                       .map(tag => (
                         <Badge key={tag} variant="secondary" className="capitalize">
                           {tag}
@@ -157,14 +176,16 @@ export function SearchResults({ query, className, searchParams }: SearchResultsP
                 <div className="flex items-center gap-6 ml-auto">
                   <div className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">London</span>
+                      <span className="font-medium">{searchParams?.from || 'Origin'}</span>
                       <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">Paris</span>
+                      <span className="font-medium">{searchParams?.to || 'Destination'}</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold">£{route.price}</div>
-                    <div className="text-sm text-muted-foreground">per person</div>
+                    <div className="text-sm text-muted-foreground">
+                      {searchParams?.passengers && searchParams.passengers > 1 ? 'total price' : 'per person'}
+                    </div>
                   </div>
                 </div>
               </div>

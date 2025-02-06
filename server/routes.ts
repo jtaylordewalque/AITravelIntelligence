@@ -5,9 +5,28 @@ import { getTravelSuggestions } from "./openai";
 
 export function registerRoutes(app: Express) {
   app.get("/api/destinations", async (req, res) => {
-    const from = req.query.from as string | undefined;
-    const to = req.query.to as string | undefined;
-    const destinations = await storage.searchDestinations({ from, to });
+    const {
+      from,
+      to,
+      departureDate,
+      returnDate,
+      passengers,
+      class: travelClass,
+      flexibleDates,
+      connectionPreference
+    } = req.query;
+
+    const destinations = await storage.searchDestinations({
+      from: from as string,
+      to: to as string,
+      departureDate: departureDate as string,
+      returnDate: returnDate as string,
+      passengers: passengers ? parseInt(passengers as string) : undefined,
+      class: travelClass as string,
+      flexibleDates: flexibleDates === 'true',
+      connectionPreference: connectionPreference as string
+    });
+
     res.json(destinations);
   });
 
@@ -26,7 +45,6 @@ export function registerRoutes(app: Express) {
     res.json(activities);
   });
 
-  // New route for AI travel suggestions
   app.get("/api/travel-suggestions", async (req, res) => {
     try {
       const prompt = req.query.prompt as string;

@@ -1,7 +1,16 @@
 import { type Destination, type TransportMode, type Activity, type RouteSegment, type CombinedRoute } from "@shared/schema";
 
 export interface IStorage {
-  searchDestinations(params: { from?: string; to?: string }): Promise<Destination[]>;
+  searchDestinations(params: { 
+    from?: string; 
+    to?: string;
+    departureDate?: string;
+    returnDate?: string;
+    passengers?: number;
+    class?: string;
+    flexibleDates?: boolean;
+    connectionPreference?: string;
+  }): Promise<Destination[]>;
   getPopularDestinations(): Promise<Destination[]>;
   getTransportModes(): Promise<TransportMode[]>;
   getActivities(): Promise<Activity[]>;
@@ -31,12 +40,12 @@ export class MemStorage implements IStorage {
     },
     {
       id: 3,
-      name: "Rideshare option",
-      description: "Flexible rideshare journey",
+      name: "Combined Train + Bus",
+      description: "Efficient multi-modal journey",
       imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
-      price: 25,
-      rating: 3,
-      tags: ["rideshare", "5h 49min"],
+      price: 45,
+      rating: 4,
+      tags: ["train", "bus", "6h 30min", "1 connection"],
     },
     {
       id: 4,
@@ -49,21 +58,21 @@ export class MemStorage implements IStorage {
     },
     {
       id: 5,
-      name: "Drive via Eurotunnel",
-      description: "Self-drive option via Eurotunnel",
+      name: "Train + Flight Connection",
+      description: "Optimal speed with rail connection",
       imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
-      price: 91,
-      rating: 4,
-      tags: ["car", "eurotunnel", "4h 41min"],
+      price: 120,
+      rating: 5,
+      tags: ["train", "plane", "5h 30min", "1 connection"],
     },
     {
       id: 6,
-      name: "Drive with ferry",
-      description: "Self-drive option with ferry crossing",
+      name: "Bus + Train Connection",
+      description: "Budget-friendly with good comfort",
       imageUrl: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4",
-      price: 91,
-      rating: 3,
-      tags: ["car", "ferry", "5h 52min"],
+      price: 55,
+      rating: 4,
+      tags: ["bus", "train", "8h 15min", "1 connection"],
     }
   ];
 
@@ -91,27 +100,75 @@ export class MemStorage implements IStorage {
     },
     {
       id: 4,
-      name: "Rideshare",
-      type: "car",
+      name: "Combined Transport",
+      type: "multi",
       imageUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
-      price: 25,
+      price: 45,
     }
   ];
 
-  async searchDestinations({ from, to }: { from?: string; to?: string }): Promise<Destination[]> {
+  async searchDestinations({ 
+    from, 
+    to, 
+    departureDate,
+    returnDate,
+    passengers = 1,
+    class: travelClass = 'economy',
+    flexibleDates = false,
+    connectionPreference = 'any'
+  }: { 
+    from?: string; 
+    to?: string;
+    departureDate?: string;
+    returnDate?: string;
+    passengers?: number;
+    class?: string;
+    flexibleDates?: boolean;
+    connectionPreference?: string;
+  }): Promise<Destination[]> {
     if (!from && !to) return this.destinations;
 
-    return this.destinations.filter(d => {
+    let filteredDestinations = this.destinations.filter(d => {
       const nameLower = d.name.toLowerCase();
       const descLower = d.description.toLowerCase();
       const fromMatch = !from || nameLower.includes(from.toLowerCase()) || descLower.includes(from.toLowerCase());
       const toMatch = !to || nameLower.includes(to.toLowerCase()) || descLower.includes(to.toLowerCase());
+
+      // Filter based on connection preference
+      if (connectionPreference !== 'any') {
+        const hasConnection = d.tags.some(tag => tag.includes('connection'));
+        if (connectionPreference === 'shorter' && hasConnection) return false;
+        if (connectionPreference === 'longer' && !hasConnection) return false;
+      }
+
+      // Apply class-based pricing
+      let adjustedPrice = d.price;
+      if (travelClass === 'business') {
+        adjustedPrice *= 2;
+      } else if (travelClass === 'first') {
+        adjustedPrice *= 3;
+      }
+      d.price = adjustedPrice * passengers;
+
       return fromMatch && toMatch;
     });
+
+    // Sort based on various criteria
+    filteredDestinations.sort((a, b) => {
+      // Prioritize higher-rated routes
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating;
+      }
+
+      // Then sort by price
+      return a.price - b.price;
+    });
+
+    return filteredDestinations;
   }
 
   async getPopularDestinations(): Promise<Destination[]> {
-    return this.destinations;
+    return this.destinations.sort((a, b) => b.rating - a.rating);
   }
 
   async getTransportModes(): Promise<TransportMode[]> {

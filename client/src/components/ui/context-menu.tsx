@@ -1,13 +1,33 @@
+/**
+ * Context Menu Component
+ * A flexible right-click menu system built on top of Radix UI's context menu primitive.
+ * 
+ * Features:
+ * - Nested submenus
+ * - Keyboard navigation
+ * - Checkbox and radio items
+ * - Custom styling with Tailwind CSS
+ * - Accessibility compliance
+ */
 import * as React from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root component that wraps the context menu functionality
+ */
 const ContextMenu = ContextMenuPrimitive.Root
 
+/**
+ * Element that triggers the context menu on right click
+ */
 const ContextMenuTrigger = ContextMenuPrimitive.Trigger
 
+/**
+ * Groups related menu items together
+ */
 const ContextMenuGroup = ContextMenuPrimitive.Group
 
 const ContextMenuPortal = ContextMenuPrimitive.Portal

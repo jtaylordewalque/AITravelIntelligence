@@ -1,11 +1,18 @@
+/**
+ * Chart component library built on top of Recharts with theme support.
+ * Provides a consistent interface for creating themed, responsive charts.
+ */
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-
 import { cn } from "@/lib/utils"
 
-// Format: { THEME_NAME: CSS_SELECTOR }
+// Theme configuration for light/dark mode support
 const THEMES = { light: "", dark: ".dark" } as const
 
+/**
+ * Configuration type for chart styling and behavior
+ * Allows defining colors, labels, and icons for chart elements
+ */
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
@@ -20,8 +27,15 @@ type ChartContextProps = {
   config: ChartConfig
 }
 
+/**
+ * Context for sharing chart configuration between components
+ */
 const ChartContext = React.createContext<ChartContextProps | null>(null)
 
+/**
+ * Hook to access chart configuration from context
+ * Must be used within a ChartContainer
+ */
 function useChart() {
   const context = React.useContext(ChartContext)
 
@@ -32,6 +46,10 @@ function useChart() {
   return context
 }
 
+/**
+ * Main container component for charts
+ * Provides theme context and responsive wrapper
+ */
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -314,7 +332,9 @@ const ChartLegendContent = React.forwardRef<
 )
 ChartLegendContent.displayName = "ChartLegend"
 
-// Helper to extract item config from a payload.
+/**
+ * Helper to extract item config from a payload.
+ */
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,

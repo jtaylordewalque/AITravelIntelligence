@@ -15,6 +15,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlacesAutocomplete } from "./places-autocomplete";
 
+// Define the search form validation schema using Zod
 const searchSchema = z.object({
   origin: z.string().min(2, "Please enter at least 2 characters"),
   destination: z.string().min(2, "Please enter at least 2 characters"),
@@ -28,14 +29,18 @@ const searchSchema = z.object({
   connectionPreference: z.enum(["shorter", "longer", "any"]).default("any"),
 });
 
+// TypeScript type inference from the Zod schema
 type SearchFormData = z.infer<typeof searchSchema>;
 
 export function SearchForm() {
   const [, setLocation] = useLocation();
+  // State for managing calendar popovers
   const [departureDateOpen, setDepartureDateOpen] = useState(false);
   const [returnDateOpen, setReturnDateOpen] = useState(false);
+  // State for advanced options visibility
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Initialize form with react-hook-form and Zod validation
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
@@ -48,7 +53,9 @@ export function SearchForm() {
     },
   });
 
+  // Handle form submission
   function onSubmit(data: SearchFormData) {
+    // Convert form data to URL search params
     const searchParams = new URLSearchParams({
       from: data.origin,
       to: data.destination,
@@ -59,6 +66,7 @@ export function SearchForm() {
       flexibleDates: data.flexibleDates.toString(),
       connectionPreference: data.connectionPreference,
     });
+    // Navigate to search results page with query parameters
     setLocation(`/search?${searchParams.toString()}`);
   }
 
@@ -66,6 +74,7 @@ export function SearchForm() {
     <div className="w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Origin and Destination Fields */}
           <div className="flex gap-4">
             <FormField
               control={form.control}
@@ -100,7 +109,9 @@ export function SearchForm() {
             />
           </div>
 
+          {/* Date Selection Fields */}
           <div className="flex gap-4">
+            {/* Departure Date */}
             <FormField
               control={form.control}
               name="departureDate"
@@ -144,6 +155,7 @@ export function SearchForm() {
               )}
             />
 
+            {/* Return Date */}
             <FormField
               control={form.control}
               name="returnDate"
@@ -189,7 +201,9 @@ export function SearchForm() {
             />
           </div>
 
+          {/* Passenger Count and Travel Class Selection */}
           <div className="flex gap-4">
+            {/* Passenger Count Spinner */}
             <FormField
               control={form.control}
               name="passengers"
@@ -233,6 +247,7 @@ export function SearchForm() {
               )}
             />
 
+            {/* Travel Class Selection */}
             <FormField
               control={form.control}
               name="class"
@@ -255,10 +270,12 @@ export function SearchForm() {
             />
           </div>
 
+          {/* Search Button */}
           <Button type="submit" className="w-full">
             Explore all routes
           </Button>
 
+          {/* Advanced Options Toggle */}
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -281,6 +298,7 @@ export function SearchForm() {
             </Button>
           </div>
 
+          {/* Advanced Options Panel with Animation */}
           <AnimatePresence>
             {showAdvanced && (
               <motion.div
@@ -292,6 +310,7 @@ export function SearchForm() {
               >
                 <div className="space-y-4 pt-4 border-t">
                   <div className="grid gap-4">
+                    {/* Flexible Dates Option */}
                     <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
                       <div className="flex items-center gap-2">
                         <Switch
@@ -305,6 +324,7 @@ export function SearchForm() {
                       </div>
                     </div>
 
+                    {/* Connection Preference Selection */}
                     <div className="bg-muted/50 p-3 rounded-lg">
                       <p className="font-medium mb-2">Connection preference</p>
                       <Select

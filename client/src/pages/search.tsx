@@ -3,6 +3,7 @@ import { useLocation, Link } from "wouter";
 import { SearchForm } from "@/components/search-form";
 import { SearchResults } from "@/components/search-results";
 import { type Destination } from "@shared/schema";
+import { format } from "date-fns";
 import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -50,29 +51,20 @@ export default function Search() {
           </div>
           <div className="text-center text-white mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {from && to ? `${from} to ${to}` : 'Search Routes'}
+              Voyage Genius
             </h1>
             <p className="text-lg md:text-xl">
-              {from && to ? `Discover the perfect route for your journey` : 'Enter your travel details'}
+              Discover the perfect route for your journey
             </p>
           </div>
           <div className="max-w-2xl mx-auto">
-            <SearchForm 
-              defaultValues={{
-                from,
-                to,
-                departureDate: departureDate?.toISOString().split('T')[0] || '',
-                returnDate: returnDate?.toISOString().split('T')[0] || '',
-                passengers: passengers.toString(),
-                class: travelClass,
-              }}
-            />
+            <SearchForm />
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl">
           <SearchResults 
             query={`${from} ${to}`} 
             className={isLoading ? "opacity-50" : ""}

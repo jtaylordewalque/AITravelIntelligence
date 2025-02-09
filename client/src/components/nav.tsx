@@ -14,8 +14,8 @@ export function Nav() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-xl">
-              Voyage Genius
+            <Link href="/">
+              <a className="font-bold text-xl">Voyage Genius</a>
             </Link>
             <div className="hidden md:flex items-center gap-4">
               <Link href="/search">
